@@ -1,3 +1,8 @@
+import java.io.File;
+import java.util.ArrayList;
+
+import Jama.Matrix;
+
 
 public class Main {
 	
@@ -9,9 +14,31 @@ public class Main {
 	 * 
 	 */
 	
-	public static void main(String[] args) {
+	public void main(String[] args) {
 		
-
+		Matrix preparedMatrix = func.Fonctions.PrepareMatrix(new File("../GTI770-L4/Faces-dataset"));
+		
+		
+		// Cross Validation
+		Validate(preparedMatrix);
 	}
 
+	public void Validate(Matrix preparedMatrix)
+	{
+		ArrayList<Matrix> matrixArray = new ArrayList<Matrix>();
+		// Prepare Matrices
+		for(int k = 0; k < 10; k++)
+		{
+			// Split Matrices into 40 Matrices containing 1 vector of each class
+			//matrixArray.set(0,preparedMatrix.getMatrix(0, 1, arg2, arg3));
+		}
+		
+		//Validate
+		double mean = 0;
+		double variance = 0;
+		for(int k = 0; k < 10 ; k++)
+		{
+			
+		}
+	}
 }

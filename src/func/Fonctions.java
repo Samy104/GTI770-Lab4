@@ -1,7 +1,13 @@
 package func;
 
+
+
 import java.util.ArrayList;
+import java.awt.image.*;
+import java.io.*;
 import java.util.Random;
+
+import javax.imageio.ImageIO;
 
 import Jama.Matrix;
 /*
@@ -10,6 +16,72 @@ import Jama.Matrix;
 public class Fonctions {
 	
 	private Fonctions(){}
+	
+	public static Matrix getMatrixFromImage(String path)
+	{
+		BufferedImage img = null;
+		try {
+		    	img = ImageIO.read(new File(path));
+		    	System.out.print(img.getData() +"\n");
+		} catch (IOException e) {
+			System.out.println("Could not read the file at " + path);
+		} catch(NullPointerException e){
+			System.out.print("File: "+path+" is not an image. \n");
+		}
+
+		Matrix newImg = new Matrix(0, img.getHeight());
+		
+		for(int i=0;i<img.getHeight();i++) 
+	    {
+	        for(int j=0;j<img.getWidth();j++)
+	        {
+	        	int rgb = img.getRGB(i, j);
+	        	System.out.print(rgb);
+	        	
+	            newImg.set(0,1,rgb);
+	        }
+	    }   
+		
+		return newImg;
+	}
+	
+	public static Matrix PrepareMatrix(File files){
+		Matrix collectionOfFiles = null;
+		for(File file : files.listFiles())
+		{
+			if(file.isDirectory())
+			{
+				System.out.println("Directory: " + file.getName());
+				if(collectionOfFiles == null)
+				{
+					collectionOfFiles = PrepareMatrix(file); // Calls same method again.
+				}
+				else
+				{
+					collectionOfFiles = AppendMatrix(collectionOfFiles, PrepareMatrix(file));
+				}
+			}
+			else 
+			{
+				if(file.getName().substring(file.getName().length()-4, file.getName().length()) == ".img"
+					|| file.getName().substring(file.getName().length()-4, file.getName().length()) == ".jpg"
+					|| file.getName().substring(file.getName().length()-5, file.getName().length()) == ".jpeg")
+				{
+					if(collectionOfFiles == null)
+					{
+						collectionOfFiles = getMatrixFromImage(file.getName());
+					}
+					else
+					{
+						collectionOfFiles = AppendMatrix(collectionOfFiles, PrepareMatrix(file));
+					}
+				}
+				
+				System.out.println("File: " + file.getName());
+			}
+		}
+		return collectionOfFiles;
+	}
 	
 	public static int getMaxDet(Matrix x)
 	{
@@ -216,5 +288,47 @@ public class Fonctions {
 			finalPosition++;
 		}
 		return randMatrix;
+	}
+	
+	/**
+	 * La fonction prends le ArrayList de Matrices et choisis les 225 rangées qui n'appartiennent pas à l'indice.
+	 * 
+	 * @param ArrayList<Matrix> agg
+	 * @param int thene
+	 * @return Matrice aggregation
+	 */
+	public static Matrix aggregateExceptOne(ArrayList<Matrix> agg, int theone)
+	{
+		Matrix aggregation = new Matrix(225,2);
+		int currentPos = 0;
+		int[] col = {0,1};
+		
+		for(int i = 1; i < 10; i++)
+		{
+			if(theone != i)
+			{
+				aggregation.setMatrix(currentPos,(currentPos+24), col, agg.get(i));
+				currentPos += 25;
+			}
+			
+		}
+		
+		return aggregation;
+	}
+	
+	public static Matrix AppendMatrix(Matrix a, Matrix b)
+	{
+		if(a.getRowDimension() != b.getRowDimension())
+		{
+			System.out.println("You can't augment two matrices that arn't compatible.");
+			return null;
+		}
+		Matrix newMat = new Matrix(a.getRowDimension(), a.getColumnDimension()+b.getColumnDimension());
+		
+		// Merge the two matrices
+		newMat.setMatrix(0, a.getRowDimension()-1, 0, a.getColumnDimension()-1, a);
+		newMat.setMatrix(a.getRowDimension()-1,a.getRowDimension()-1+b.getRowDimension(),0 ,b.getColumnDimension(), b);
+		
+		return newMat;
 	}
 }
