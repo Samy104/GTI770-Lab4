@@ -30,7 +30,7 @@ public class Main {
 		for(int k = 0; k < 10; k++)
 		{
 			// Split Matrices into 40 Matrices containing 1 vector of each class
-			//matrixArray.set(0,preparedMatrix.getMatrix(0, 1, arg2, arg3));
+			matrixArray.set(k,func.Fonctions.AppendRecursively(preparedMatrix, k, 40));
 		}
 		
 		//Validate
@@ -38,7 +38,18 @@ public class Main {
 		double variance = 0;
 		for(int k = 0; k < 10 ; k++)
 		{
-			
+			EntrainerModele(func.Fonctions.aggregateExceptOne(matrixArray, k));
+			EvaluerModele(matrixArray.get(k));
 		}
+	}
+	
+	public void EntrainerModele(Matrix ent)
+	{
+		
+	}
+	
+	public void EvaluerModele(Matrix ev)
+	{
+		
 	}
 }

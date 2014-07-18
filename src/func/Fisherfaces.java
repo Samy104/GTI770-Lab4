@@ -42,7 +42,6 @@ public class Fisherfaces {
 	
 	public static Matrix WFLD(Matrix W)
 	{
-		
 		Matrix num = W.times(WPCA(W).times(BetweenScatterMatrix(W).times(WPCA(W).transpose().times(W.transpose()))));
 		Matrix denum = W.times(WPCA(W).times(WithinScatterMatrix(W).times(WPCA(W).transpose().times(W.transpose()))));
 		// Reminder X/Y = X*Y^⁻1
