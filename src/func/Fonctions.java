@@ -17,19 +17,10 @@ public class Fonctions {
 	
 	private Fonctions(){}
 	
-	public static Matrix getMatrixFromImage(String path)
+	public static Matrix getMatrixFromImage(BufferedImage img)
 	{
-		BufferedImage img = null;
-		try {
-		    	img = ImageIO.read(new File(path));
-		    	System.out.print(img.getData() +"\n");
-		} catch (IOException e) {
-			System.out.println("Could not read the file at " + path);
-		} catch(NullPointerException e){
-			System.out.print("File: "+path+" is not an image. \n");
-		}
-
-		Matrix newImg = new Matrix(0, img.getHeight());
+		
+		Matrix newImg = new Matrix(0, img.getHeight()*img.getWidth());
 		
 		for(int i=0;i<img.getHeight();i++) 
 	    {
@@ -38,7 +29,7 @@ public class Fonctions {
 	        	int rgb = img.getRGB(i, j);
 	        	System.out.print(rgb);
 	        	
-	            newImg.set(0,1,rgb);
+	            newImg.set(0,j,rgb);
 	        }
 	    }   
 		
@@ -63,18 +54,25 @@ public class Fonctions {
 			}
 			else 
 			{
-				if(file.getName().substring(file.getName().length()-4, file.getName().length()) == ".img"
-					|| file.getName().substring(file.getName().length()-4, file.getName().length()) == ".jpg"
-					|| file.getName().substring(file.getName().length()-5, file.getName().length()) == ".jpeg")
-				{
-					if(collectionOfFiles == null)
-					{
-						collectionOfFiles = getMatrixFromImage(file.getName());
-					}
-					else
-					{
-						collectionOfFiles = AppendMatrix(collectionOfFiles, PrepareMatrix(file));
-					}
+				BufferedImage img = null;
+				try {
+				    	img = ImageIO.read(file);
+				    	
+				    	if(collectionOfFiles == null)
+						{
+							collectionOfFiles = getMatrixFromImage(img);
+						}
+						else
+						{
+							collectionOfFiles = AppendMatrix(collectionOfFiles, PrepareMatrix(file));
+						}
+				    	
+				    	System.out.print(img.getData() +"\n");
+				    	
+				} catch (IOException e) {
+					System.out.println("Could not read the file at " + file.getPath());
+				} catch(NullPointerException e){
+					System.out.print("File: "+file.getPath()+" is not an image. \n");
 				}
 				
 				System.out.println("File: " + file.getName());
