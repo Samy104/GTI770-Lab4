@@ -14,7 +14,7 @@ public class Main {
 	 * 
 	 */
 	
-	public void main(String[] args) {
+	public static void main(String[] args) {
 		
 		Matrix preparedMatrix = func.Fonctions.PrepareMatrix(new File("../GTI770-L4/Faces-dataset"));
 		
@@ -23,7 +23,7 @@ public class Main {
 		Validate(preparedMatrix);
 	}
 
-	public void Validate(Matrix preparedMatrix)
+	public static void Validate(Matrix preparedMatrix)
 	{
 		ArrayList<Matrix> matrixArray = new ArrayList<Matrix>();
 		// Prepare Matrices
@@ -43,12 +43,12 @@ public class Main {
 		}
 	}
 	
-	public void EntrainerModele(Matrix ent)
+	public static void EntrainerModele(Matrix ent)
 	{
 		
 	}
 	
-	public void EvaluerModele(Matrix ev)
+	public static void EvaluerModele(Matrix ev)
 	{
 		
 	}
