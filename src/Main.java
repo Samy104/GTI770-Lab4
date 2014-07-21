@@ -1,6 +1,8 @@
 import java.io.File;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
+
 import Jama.Matrix;
 
 
@@ -16,11 +18,11 @@ public class Main {
 	
 	public static void main(String[] args) {
 		
-		Matrix preparedMatrix = func.Fonctions.PrepareMatrix(new File("../GTI770-L4/Faces-dataset"));
-		
+		Matrix preparedMatrix = func.Fonctions.PrepareMatrix(new File("../gti770-lab4/Faces-dataset"));
+
 		
 		// Cross Validation
-		Validate(preparedMatrix);
+		//Validate(preparedMatrix);
 	}
 
 	public static void Validate(Matrix preparedMatrix)
@@ -30,7 +32,7 @@ public class Main {
 		for(int k = 0; k < 10; k++)
 		{
 			// Split Matrices into 40 Matrices containing 1 vector of each class
-			matrixArray.set(k,func.Fonctions.AppendRecursively(preparedMatrix, k, 40));
+			//matrixArray.set(k,func.Fonctions.AppendRecursively(preparedMatrix, k, 40));
 		}
 		
 		//Validate

@@ -3,11 +3,16 @@ package func;
 
 
 import java.util.ArrayList;
+import java.awt.Image;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
 import java.awt.image.*;
 import java.io.*;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
+import javax.swing.ImageIcon;
 
 import Jama.Matrix;
 /*
@@ -17,32 +22,63 @@ public class Fonctions {
 	
 	private Fonctions(){}
 	
+	/*public static Matrix getMatrixFromInputStream(FileInputStream fis, int imageWidth,int imageHeight)
+	{
+		double data[][]  = new double[imageWidth][imageHeight];
+		int index = 9;
+		while(index > 0){
+			try {
+				int c = fis.read();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			index--;
+		}
+		try {
+			for(int x=0;x<imageWidth;x++) 
+		    {
+		        for(int y=0;y<imageHeight;y++)
+		        {		        	
+		           	data[x][y] = fis.readUnsignedByte();
+		        }
+		    } 
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return new Matrix(data);
+	}*/
+	
 	public static Matrix getMatrixFromImage(BufferedImage img)
 	{
-		
-		Matrix newImg = new Matrix(0, img.getHeight()*img.getWidth());
-		
-		for(int i=0;i<img.getHeight();i++) 
-	    {
-	        for(int j=0;j<img.getWidth();j++)
-	        {
-	        	int rgb = img.getRGB(i, j);
-	        	System.out.print(rgb);
-	        	
-	            newImg.set(0,j,rgb);
-	        }
-	    }   
-		
-		return newImg;
+		double[] pixelStore = new double[img.getWidth()];
+		int b = 0;
+			for(int x=0;x<img.getWidth();x++) 
+		    {
+		        for(int y=0;y<img.getHeight();y++)
+		        {		        	
+		        	double s = img.getRaster().getSample(x,y,b);
+		        	
+		        	pixelStore[x]=s;
+		        }
+		    } 
+		return new Matrix(pixelStore,1);
 	}
 	
-	public static Matrix PrepareMatrix(File files){
+	public static void createImage(String path, FileInputStream fis){
+		
+	}
+	
+	public static Matrix PrepareMatrix(File folder){
 		Matrix collectionOfFiles = null;
-		for(File file : files.listFiles())
+		
+		for(File file : folder.listFiles())
 		{
 			if(file.isDirectory())
 			{
 				System.out.println("Directory: " + file.getName());
+				//PrepareMatrix(file);
 				if(collectionOfFiles == null)
 				{
 					collectionOfFiles = PrepareMatrix(file); // Calls same method again.
@@ -54,28 +90,46 @@ public class Fonctions {
 			}
 			else 
 			{
-				BufferedImage img = null;
+				BufferedImage img = null;							
+				FileInputStream fis = null;
 				try {
-				    	img = ImageIO.read(file);
-				    	
-				    	if(collectionOfFiles == null)
-						{
-							collectionOfFiles = getMatrixFromImage(img);
+					fis = new FileInputStream(file);
+					BufferedInputStream bis = new BufferedInputStream(fis);
+					DataInputStream dis = new DataInputStream(bis);
+					try {
+						
+						img = ImageIO.read(fis);
+						if(img != null){
+							System.out.println("File to matrix: " + file.getName());
+							Matrix matrixToAdd = FileManager.convertPGMtoMatrix(file.getAbsolutePath(),img.getHeight(),img.getWidth());//(fis, img.getWidth(),img.getHeight());
+							matrixToAdd.print(matrixToAdd.getColumnDimension(), 0);
+							if(collectionOfFiles == null){
+								collectionOfFiles = matrixToAdd;
+							}
+							else{
+								collectionOfFiles = AppendMatrix(collectionOfFiles, matrixToAdd);
+							}
 						}
-						else
-						{
-							collectionOfFiles = AppendMatrix(collectionOfFiles, PrepareMatrix(file));
+						//getMatrixFromImage(img);
+						createImage("../gti770-lab4/imageRecreations/", fis);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}finally{
+						try {
+							dis.close();
+							bis.close();
+							fis.close();
+						} catch (IOException e) {
+							e.printStackTrace();
 						}
-				    	
-				    	System.out.print(img.getData() +"\n");
-				    	
-				} catch (IOException e) {
-					System.out.println("Could not read the file at " + file.getPath());
-				} catch(NullPointerException e){
-					System.out.print("File: "+file.getPath()+" is not an image. \n");
+					}
+				} catch (FileNotFoundException e1) {
+					e1.printStackTrace();
 				}
 				
-				System.out.println("File: " + file.getName());
+				
+				
 			}
 		}
 		return collectionOfFiles;
@@ -314,7 +368,7 @@ public class Fonctions {
 		return aggregation;
 	}
 	
-	public static Matrix AppendRecursively(Matrix initial, int k, int nbClass)
+	/*public static Matrix AppendRecursively(Matrix initial, int k, int nbClass)
 	{
 		Matrix rec = null;
 		if(nbClass > 0)
@@ -324,21 +378,16 @@ public class Fonctions {
 		
 		// Once the nbClass == 0 this will be the final return
 		return rec;
-	}
+	}*/
 	
-	public static Matrix AppendMatrix(Matrix a, Matrix b)
-	{
-		if(a.getRowDimension() != b.getRowDimension())
-		{
-			System.out.println("You can't augment two matrices that arn't compatible.");
-			return null;
-		}
-		Matrix newMat = new Matrix(a.getRowDimension(), a.getColumnDimension()+b.getColumnDimension());
+	
+	public static Matrix AppendMatrix(Matrix a, Matrix b){
+		Matrix augmentedMatrix = new Matrix(a.getRowDimension(),a.getColumnDimension()+1);
 		
-		// Merge the two matrices
-		newMat.setMatrix(0, a.getRowDimension()-1, 0, a.getColumnDimension()-1, a);
-		newMat.setMatrix(a.getRowDimension()-1,a.getRowDimension()-1+b.getRowDimension(),0 ,b.getColumnDimension(), b);
+		augmentedMatrix.setMatrix(0, a.getRowDimension(), a.getColumnDimension()+1, a.getColumnDimension()+1, b);
 		
-		return newMat;
+		augmentedMatrix.print(a.getColumnDimension(),0);
+		
+		return augmentedMatrix;
 	}
 }
