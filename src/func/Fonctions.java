@@ -66,6 +66,18 @@ public class Fonctions {
 		return new Matrix(pixelStore,1);
 	}
 	
+	public static Matrix MatrixToColumnMatrix(Matrix orig)
+	{
+		Matrix newMat = new Matrix(orig.getColumnDimension()*orig.getRowDimension(),1);
+		
+		for(int col = 0; col < orig.getColumnDimension(); col++)
+		{
+			newMat.setMatrix(0+col*orig.getRowDimension(), orig.getRowDimension()-1+col*orig.getRowDimension(), 0, 0, orig.getMatrix(0, orig.getRowDimension()-1, col, col));
+		}
+		
+		return newMat;
+	}
+	
 	public static void createImage(String path, FileInputStream fis){
 		
 	}
@@ -101,7 +113,7 @@ public class Fonctions {
 						img = ImageIO.read(fis);
 						if(img != null){
 							System.out.println("File to matrix: " + file.getName());
-							Matrix matrixToAdd = FileManager.convertPGMtoMatrix(file.getAbsolutePath(),img.getHeight(),img.getWidth());//(fis, img.getWidth(),img.getHeight());
+							Matrix matrixToAdd = MatrixToColumnMatrix(FileManager.convertPGMtoMatrix(file.getAbsolutePath(),img.getHeight(),img.getWidth()));//(fis, img.getWidth(),img.getHeight());
 							matrixToAdd.print(matrixToAdd.getColumnDimension(), 0);
 							if(collectionOfFiles == null){
 								collectionOfFiles = matrixToAdd;
@@ -382,11 +394,10 @@ public class Fonctions {
 	
 	
 	public static Matrix AppendMatrix(Matrix a, Matrix b){
-		Matrix augmentedMatrix = new Matrix(a.getRowDimension(),a.getColumnDimension()+1);
+		Matrix augmentedMatrix = new Matrix(a.getRowDimension(),a.getColumnDimension()+b.getColumnDimension());
 		
-		augmentedMatrix.setMatrix(0, a.getRowDimension(), a.getColumnDimension()+1, a.getColumnDimension()+1, b);
-		
-		augmentedMatrix.print(a.getColumnDimension(),0);
+		augmentedMatrix.setMatrix(0, a.getRowDimension()-1, 0, a.getColumnDimension()-1, a);
+		augmentedMatrix.setMatrix(0, a.getRowDimension()-1, a.getColumnDimension(), a.getColumnDimension()+b.getColumnDimension()-1, b);
 		
 		return augmentedMatrix;
 	}
