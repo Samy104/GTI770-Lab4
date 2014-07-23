@@ -113,8 +113,7 @@ public class Fonctions {
 						img = ImageIO.read(fis);
 						if(img != null){
 							System.out.println("File to matrix: " + file.getName());
-							Matrix matrixToAdd = MatrixToColumnMatrix(FileManager.convertPGMtoMatrix(file.getAbsolutePath(),img.getHeight(),img.getWidth()));//(fis, img.getWidth(),img.getHeight());
-							matrixToAdd.print(matrixToAdd.getColumnDimension(), 0);
+							Matrix matrixToAdd = MatrixToColumnMatrix(FileManager.convertPGMtoMatrix(file.getAbsolutePath(),img.getHeight(),img.getWidth()));
 							if(collectionOfFiles == null){
 								collectionOfFiles = matrixToAdd;
 							}
@@ -122,8 +121,6 @@ public class Fonctions {
 								collectionOfFiles = AppendMatrix(collectionOfFiles, matrixToAdd);
 							}
 						}
-						//getMatrixFromImage(img);
-						createImage("../gti770-lab4/imageRecreations/", fis);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

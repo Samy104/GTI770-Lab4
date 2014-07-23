@@ -18,7 +18,7 @@ public class Main {
 	
 	public static void main(String[] args) {
 		
-		Matrix preparedMatrix = func.Fonctions.PrepareMatrix(new File("../gti770-lab4/Faces-dataset"));
+		Matrix preparedMatrix = func.Fonctions.PrepareMatrix(new File("../gti770-lab4/Faces-dataset/Train"));
 
 		
 		// Cross Validation
