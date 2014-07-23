@@ -377,17 +377,21 @@ public class Fonctions {
 		return aggregation;
 	}
 	
-	/*public static Matrix AppendRecursively(Matrix initial, int k, int nbClass)
+	public static Matrix AppendRecursively(Matrix initial, int k, int nbClass)
 	{
 		Matrix rec = null;
-		if(nbClass > 0)
+		if(nbClass > 1)
 		{
-			rec = AppendMatrix(initial.getMatrix(0, initial.getRowDimension(), nbClass-1+40*k, nbClass-1+k),AppendRecursively(initial,k, nbClass-1));
+			rec = AppendMatrix(initial.getMatrix(0, initial.getRowDimension()-1, (nbClass-1)*10+k, (nbClass-1)*10+k),AppendRecursively(initial,k, nbClass-1));
+		}
+		else
+		{
+			rec = initial.getMatrix(0, initial.getRowDimension()-1, (nbClass-1)*10+k, (nbClass-1)*10+k);
 		}
 		
 		// Once the nbClass == 0 this will be the final return
 		return rec;
-	}*/
+	}
 	
 	
 	public static Matrix AppendMatrix(Matrix a, Matrix b){
