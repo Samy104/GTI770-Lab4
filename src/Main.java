@@ -19,8 +19,14 @@ public class Main {
 	public static void main(String[] args) {
 		
 		Matrix preparedMatrix = func.Fonctions.PrepareMatrix(new File("../gti770-lab4/Faces-dataset"));
-
 		
+		//Matrix wBet = func.Fisherfaces.BetweenScatterMatrix(preparedMatrix);
+		//Matrix wOut = func.Fisherfaces.WithinScatterMatrix(preparedMatrix);
+		//System.out.println(wBet.get(0,0));
+		//System.out.println(wOut.get(0, 0));
+		Matrix wPca = func.Fisherfaces.ScatterMatrix(preparedMatrix);
+		//System.out.println(wPca.get(0,0) + "  :  " + wPca.get(1,1));
+		wPca.print(10,2);
 		// Cross Validation
 		Validate(preparedMatrix);
 	}
@@ -40,6 +46,7 @@ public class Main {
 		double variance = 0;
 		for(int k = 0; k < 10 ; k++)
 		{
+			System.out.println("Mean total for k interation " + k + " " +func.Fonctions.meanTotal(func.Fonctions.aggregateExceptOne(matrixArray, k)));
 			EntrainerModele(func.Fonctions.aggregateExceptOne(matrixArray, k));
 			EvaluerModele(matrixArray.get(k));
 		}

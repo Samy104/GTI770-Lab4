@@ -17,20 +17,43 @@ public class Fisherfaces {
 	
 	public static Matrix BetweenScatterMatrix(Matrix W)
 	{
-		Matrix scatterB = null;
+		Matrix mean = new Matrix(W.getColumnDimension(),W.getRowDimension());
+		int n = W.getColumnDimension() / func.Fonctions.numberClasses;
 		
+		for(int col = 0; col < W.getColumnDimension(); col++)
+		{
+			// For every chunk of 40 elements get the same class element within each
+			double totalClass = 0;
+			for(int groupIndex = col%n; groupIndex < W.getColumnDimension(); groupIndex += func.Fonctions.numberClasses)
+			{
+				totalClass += func.Fonctions.mean(W, groupIndex);
+			}
+			for(int row = 0; row < W.getRowDimension(); row++)
+			{
+				mean.set(col,row,n*(W.get(row, col)-totalClass/n));
+			}
+		}
 		
-		
-		return scatterB;
+		return mean.transpose().times(mean);
 	}
 	
 	public static Matrix WithinScatterMatrix(Matrix W)
 	{
-		Matrix scatterO = null;
+		Matrix mean = new Matrix(W.getColumnDimension(),1);
+		int n = W.getColumnDimension() / func.Fonctions.numberClasses;
 		
+		for(int col = 0; col < W.getColumnDimension(); col++)
+		{
+			// For every chunk of 40 elements get the same class element within each
+			double totalClass = 0;
+			for(int groupIndex = col%n; groupIndex < W.getColumnDimension(); groupIndex += func.Fonctions.numberClasses)
+			{
+				totalClass += func.Fonctions.mean(W, groupIndex);
+			}
+			mean.set(col,0,n*(totalClass/n-func.Fonctions.meanTotal(W)));
+		}
 		
-		
-		return scatterO;
+		return mean.transpose().times(mean);
 	}
 	
 	public static Matrix WPCA(Matrix W)
@@ -52,7 +75,7 @@ public class Fisherfaces {
 		return wfld;
 	}
 	
-	public static Matrix WOPT(Matrix W, Matrix sb)
+	public static Matrix WOPT(Matrix W)
 	{
 		Matrix wopt = WPCA(W).inverse().times(WFLD(W).inverse()).inverse();
 		int col = func.Fonctions.getMaxDet(W);

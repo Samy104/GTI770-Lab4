@@ -19,6 +19,7 @@ import Jama.Matrix;
  * Functions for Matrices
  */
 public class Fonctions {
+	public static int numberClasses = 0;
 	
 	private Fonctions(){}
 	
@@ -99,6 +100,7 @@ public class Fonctions {
 				{
 					collectionOfFiles = AppendMatrix(collectionOfFiles, PrepareMatrix(file));
 				}
+				numberClasses++;
 			}
 			else 
 			{
@@ -160,12 +162,12 @@ public class Fonctions {
 	}
 	public static Matrix GenerateScatterMatrix(Matrix x){	
 		
-		Matrix xBar = new Matrix(x.getRowDimension(), x.getColumnDimension()-1);
+		Matrix xBar = new Matrix(x.getRowDimension(), x.getColumnDimension());
 		double average;
-		for(int j = 0; j < 5;j++){
-			average = mean(x,j+1);
+		for(int j = 0; j < x.getColumnDimension();j++){
+			average = mean(x,j);
 			for(int i = 0; i < x.getRowDimension();i++){
-				double meanTest = (x.get(i, j+1) - average);
+				double meanTest = (x.get(i, j) - average);
 				xBar.set(i, j,meanTest);
 			}
 		}
@@ -181,6 +183,27 @@ public class Fonctions {
 		}
 		
 		return data/x.getRowDimension();
+	}
+	
+	public static double meanTotal(Matrix x)
+	{
+		double[] data = new double[x.getColumnDimension()];
+		double total = 0;
+		for(int j = 0; j < x.getColumnDimension(); j++)
+		{
+			for(int i = 0; i < x.getRowDimension(); i++)
+			{
+				data[j] += x.get(i, j);
+			}
+			data[j] = data[j]/x.getRowDimension();
+		}
+		
+		for(int count = 0; count < data.length; count++)
+		{
+			total += data[count];
+		}
+		
+		return total/data.length;
 	}
 	
 	public static int GetAmount(Matrix matrix, int i) {
