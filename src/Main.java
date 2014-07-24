@@ -24,9 +24,9 @@ public class Main {
 		//Matrix wOut = func.Fisherfaces.WithinScatterMatrix(preparedMatrix);
 		//System.out.println(wBet.get(0,0));
 		//System.out.println(wOut.get(0, 0));
-		Matrix wPca = func.Fisherfaces.ScatterMatrix(preparedMatrix);
-		//System.out.println(wPca.get(0,0) + "  :  " + wPca.get(1,1));
-		wPca.print(10,2);
+		Matrix wPca = func.Fisherfaces.WFLD(preparedMatrix);
+		System.out.println(wPca.getColumnDimension()+"  "+wPca.getRowDimension());
+		//wPca.print(10,2);
 		// Cross Validation
 		Validate(preparedMatrix);
 	}

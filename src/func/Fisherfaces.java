@@ -65,8 +65,9 @@ public class Fisherfaces {
 	
 	public static Matrix WFLD(Matrix W)
 	{
-		Matrix num = W.times(WPCA(W).times(BetweenScatterMatrix(W).times(WPCA(W).transpose().times(W.transpose()))));
-		Matrix denum = W.times(WPCA(W).times(WithinScatterMatrix(W).times(WPCA(W).transpose().times(W.transpose()))));
+		Matrix wpca = WPCA(W);
+		Matrix num = W.times(wpca.times(BetweenScatterMatrix(W).times(wpca.transpose().times(W.transpose()))));
+		Matrix denum = W.times(wpca.times(WithinScatterMatrix(W).times(wpca.transpose().times(W.transpose()))));
 		// Reminder X/Y = X*Y^⁻1
 		Matrix wfld = num.times(denum.transpose());
 		int col = func.Fonctions.getMaxDet(wfld);

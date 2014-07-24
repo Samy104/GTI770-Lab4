@@ -153,6 +153,7 @@ public class Fonctions {
 		
 		for(int col = 0; col < x.getColumnDimension(); col++)
 		{
+			System.out.println(x.getRowDimension());
 			double det = x.getMatrix(0, x.getRowDimension()-1, col, col).det();
 			index = (det > max) ? col : index;
 			max = (det > max) ? det : max;
