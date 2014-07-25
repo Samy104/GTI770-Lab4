@@ -29,8 +29,9 @@ public class PCA {
 	public void Calculate()
 	{
 		
-		this.matriceDeCovariance = func.Fonctions.GenerateScatterMatrix(xMatrix);
-		xBar = this.matriceDeCovariance;
+		this.xBar = func.Fonctions.GenerateScatterMatrix(xMatrix);
+		this.matriceDeCovariance = xBar.transpose().times(xBar);
+		
 		printToFile("Output/datMatrix.txt");
 		
 	}
@@ -169,5 +170,9 @@ public class PCA {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public Matrix getProjectedMatrix(){
+		return this.Z;
 	}
 }

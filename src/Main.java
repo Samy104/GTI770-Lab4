@@ -65,28 +65,29 @@ public class Main {
 			matrixArray.add(k,func.Fonctions.AppendRecursively(preparedMatrix, k, 40));
 		}
 		
+		
+		
 		//Validate
 		double mean = 0;
 		double variance = 0;
 		for(int k = 0; k < 10 ; k++)
 		{
 			//System.out.println("Mean total for k interation " + k + " " +func.Fonctions.meanTotal(func.Fonctions.aggregateExceptOne(matrixArray, k)));
-			EntrainerModele(func.Fonctions.aggregateExceptOne(matrixArray, k));
+			PCA toTrain = new PCA(func.Fonctions.aggregateExceptOne(matrixArray, k));
+			toTrain.Calculate();
+			Matrix toTrainProjected = toTrain.getProjectedMatrix();
+			EntrainerModele(toTrainProjected);
 			EvaluerModele(matrixArray.get(k));
 		}
 	}
 	
 	public static void EntrainerModele(Matrix ent)
 	{
-		PCA z = new PCA(ent);
-		z.Calculate();
-		
-		Matrix z3 = z.Z;
 		
 		PrintWriter write = null;
 		try {
 			write = new PrintWriter(new File("Output/allMatrix.txt"));
-			z3.print(write, z3.getColumnDimension(), 0);
+			ent.print(write, ent.getColumnDimension(), 0);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
