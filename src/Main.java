@@ -1,5 +1,9 @@
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
@@ -17,9 +21,29 @@ public class Main {
 	 */
 	
 	public static void main(String[] args) {
+		Matrix preparedMatrix = null;
+			try {
+				preparedMatrix = func.Fonctions.PrepareMatrix(new File("Octave-Matrices"));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		
-		Matrix preparedMatrix = func.Fonctions.PrepareMatrix(new File("../gti770-lab4/Faces-dataset"));
-		
+			
+
+		/*	PrintWriter write = null;
+			try {
+				write = new PrintWriter(new File("Output/allMatrix.txt"));
+				preparedMatrix.print(write, preparedMatrix.getColumnDimension(), 0);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			finally{
+				write.close();
+			}*/
+			
+			System.out.println("Rows: "+preparedMatrix.getRowDimension()+" Columns: " + preparedMatrix.getColumnDimension());
 		//Matrix wBet = func.Fisherfaces.BetweenScatterMatrix(preparedMatrix);
 		//Matrix wOut = func.Fisherfaces.WithinScatterMatrix(preparedMatrix);
 		//System.out.println(wBet.get(0,0));
@@ -33,7 +57,6 @@ public class Main {
 
 	public static void Validate(Matrix preparedMatrix)
 	{
-		
 		ArrayList<Matrix> matrixArray = new ArrayList<Matrix>();
 		// Prepare Matrices
 		for(int k = 0; k < 10; k++)
@@ -57,7 +80,22 @@ public class Main {
 	{
 		PCA z = new PCA(ent);
 		z.Calculate();
-		Matrix eigen = func.Fisherfaces.computeEigen(z.Z);
+		
+		Matrix z3 = z.Z;
+		
+		PrintWriter write = null;
+		try {
+			write = new PrintWriter(new File("Output/allMatrix.txt"));
+			z3.print(write, z3.getColumnDimension(), 0);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally{
+			write.close();
+		}
+		
+		//Matrix eigen = func.Fisherfaces.computeEigen(z.Z);
 		//eigen.print(1, 0);
 		//func.Fisherfaces.WPCA(eigen);
 	}

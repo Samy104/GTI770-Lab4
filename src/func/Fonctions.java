@@ -3,6 +3,8 @@ package func;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Scanner;
 import java.awt.Image;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
@@ -22,51 +24,7 @@ public class Fonctions {
 	public static int numberClasses = 0;
 	
 	private Fonctions(){}
-	
-	/*public static Matrix getMatrixFromInputStream(FileInputStream fis, int imageWidth,int imageHeight)
-	{
-		double data[][]  = new double[imageWidth][imageHeight];
-		int index = 9;
-		while(index > 0){
-			try {
-				int c = fis.read();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			index--;
-		}
-		try {
-			for(int x=0;x<imageWidth;x++) 
-		    {
-		        for(int y=0;y<imageHeight;y++)
-		        {		        	
-		           	data[x][y] = fis.readUnsignedByte();
-		        }
-		    } 
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return new Matrix(data);
-	}*/
-	
-	public static Matrix getMatrixFromImage(BufferedImage img)
-	{
-		double[] pixelStore = new double[img.getWidth()];
-		int b = 0;
-			for(int x=0;x<img.getWidth();x++) 
-		    {
-		        for(int y=0;y<img.getHeight();y++)
-		        {		        	
-		        	double s = img.getRaster().getSample(x,y,b);
-		        	
-		        	pixelStore[x]=s;
-		        }
-		    } 
-		return new Matrix(pixelStore,1);
-	}
-	
+		
 	public static Matrix MatrixToColumnMatrix(Matrix orig)
 	{
 		Matrix newMat = new Matrix(orig.getColumnDimension()*orig.getRowDimension(),1);
@@ -83,10 +41,12 @@ public class Fonctions {
 		
 	}
 	
-	public static Matrix PrepareMatrix(File folder){
+	public static Matrix PrepareMatrix(File files) throws IOException{
 		Matrix collectionOfFiles = null;
+		File[] sup = files.listFiles();
+		Arrays.sort(sup);
 		
-		for(File file : folder.listFiles())
+		for(File file : sup)
 		{
 			if(file.isDirectory())
 			{
@@ -104,62 +64,45 @@ public class Fonctions {
 			}
 			else 
 			{
-				BufferedImage img = null;							
-				FileInputStream fis = null;
-				try {
-					fis = new FileInputStream(file);
-					BufferedInputStream bis = new BufferedInputStream(fis);
-					DataInputStream dis = new DataInputStream(bis);
-					try {
-						
-						img = ImageIO.read(fis);
-						if(img != null){
-							
-							//System.out.println("File to matrix: " + file.getName());
-							Matrix matrixToAdd = MatrixToColumnMatrix(FileManager.convertPGMtoMatrix(img,img.getHeight(),img.getWidth()));
-							PrintWriter write = null;
-							
-							try
-							{
-								write = new PrintWriter("Output/single.txt", "UTF-8");
-								matrixToAdd.print(write,1,0);
-								
-								
-							}
-							catch (IOException e)
-							{
-								e.printStackTrace();
-							}
-							if(collectionOfFiles == null){
-								collectionOfFiles = matrixToAdd;
-							}
-							else{
-								collectionOfFiles = AppendMatrix(collectionOfFiles, matrixToAdd);
-							}
-						}
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}finally{
-						try {
-							dis.close();
-							bis.close();
-							fis.close();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-				} catch (FileNotFoundException e1) {
-					e1.printStackTrace();
+				//System.out.println("File to matrix: " + file.getName());
+				Matrix matrixToAdd = GetMatrixFromFile(file.getAbsolutePath(),92,112);
+				
+				
+				if(collectionOfFiles == null){
+					collectionOfFiles = matrixToAdd;
 				}
-				
-				
-				
+				else{
+					collectionOfFiles = AppendMatrix(collectionOfFiles, matrixToAdd);
+				}
 			}
 		}
 		return collectionOfFiles;
 	}
 	
+	private static Matrix GetMatrixFromFile(String fileString, int picWidth, int picHeight) {
+	
+			Matrix matrix = new Matrix(picWidth*picHeight,1);
+			double[] futureMatrix = new double[picWidth*picHeight];
+		    try 
+		    {
+		    	Scanner scanner = new Scanner(new File(fileString));
+
+		        for(int i = 0; i < futureMatrix.length; i++) 
+		        {
+		            matrix.set(i, 0, scanner.nextInt());
+		        }
+		    } 
+		    catch(Exception ex)
+		    {
+		    	System.out.println(ex.getMessage());
+		    }
+			
+		    
+		    
+			return matrix;
+		
+	}
+
 	public static int getMaxDet(Matrix x)
 	{
 		double max = 0;
@@ -184,6 +127,7 @@ public class Fonctions {
 			for(int i = 0; i < x.getRowDimension();i++){
 				double meanTest = (x.get(i, j) - average);
 				xBar.set(i, j,meanTest);
+				
 			}
 		}
 		

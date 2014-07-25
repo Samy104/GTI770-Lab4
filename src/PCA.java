@@ -30,7 +30,7 @@ public class PCA {
 	{
 		
 		this.matriceDeCovariance = func.Fonctions.GenerateScatterMatrix(xMatrix);
-		
+		xBar = this.matriceDeCovariance;
 		printToFile("Output/datMatrix.txt");
 		
 	}
@@ -138,8 +138,8 @@ public class PCA {
 		{
 			write = new PrintWriter(path, "UTF-8");
 			
-			write.append("Matrice de Covariance:");
-			matriceDeCovariance.print(write, 5,7);
+			write.append("Matrice de Covariance:" + matriceDeCovariance.getRowDimension() + " " + matriceDeCovariance.getColumnDimension());
+			this.matriceDeCovariance.print(write, matriceDeCovariance.getColumnDimension(),4);
 			
 			write.append("Vecteur Propre:" );
 			vecteurPropre(matriceDeCovariance).print(write, 5, 3);
