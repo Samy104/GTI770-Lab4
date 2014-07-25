@@ -16,33 +16,32 @@ function [X y width height names] = read_images(path)
 	y = [];
 	names = {};
 	n = 1;
+	disp(n);
 	for i=1:length(folder)
+	
 		subject = folder{i};
-
-
 		images = list_files([path, filesep, subject]);
 		if(length(images) == 0)
 			continue; %% dismiss files or empty folder
 		end
-
+   
 		added = 0;
 		names{n} = subject;
-
 		%% build image matrix and class vector
 		for j=1:length(images)
 			%% absolute path
-			filename = [path, filesep, subject, filesep, images{j}];
-
-			fid = fopen(strcat(path,strcat("Octave-Matrices/",strcat(subject,strcat("/",strcat(j,".mat"))))),'w+');
-			disp(fid);
-			%disp(strcat(subject,strcat("_",filename)));
-
+			filename = [path, filesep, subject, filesep, images{j}]; 
+			
+			directoryyy = ["..\\..\\Octave-Matrices",filesep,subject];
+			newFile = ["..\\..\\Octave-Matrices",filesep,subject,filesep,strsplit(images{j}, "."){1,1}];
+			mkdir(directoryyy);
+			newFile = strcat(newFile, ".txt");
 			%% Octave crashes on reading non image files (uncomment this to be a bit more robust)
 			extension = strsplit(images{j}, "."){end};
 			if(~any(strcmpi(extension, {"bmp", "gif", "jpg", "jpeg", "png", "tiff"})))
 				continue;
 			endif
-
+      
 			% Quite a pythonic way to handle failure.... May blow you up just like the above.
 			try
 				T = double(imread(filename));
@@ -52,30 +51,32 @@ function [X y width height names] = read_images(path)
 			end
 
 			[height width channels] = size(T);
-
+      
 			% greyscale the image if we have 3 channels
 			if(channels == 3)
 				T = (T(:,:,1) + T(:,:,2) + T(:,:,3)) / 3;
 			end
-
+      
 			%% finally try to append data
 			try
 				%% Add image as a column vector:
-				X = [X, reshape(T,width*height,1)];
-				y = [y, n];
+				X = [reshape(T,width*height,1)];
+				y = [n];
 				added = added + 1;
 			catch
 				lerr = lasterror;
 				fprintf(1,'Image cannot be added to the Array. Wrong image size?\n')
 			end
+			fid = fopen(newFile,"w+");
+			fdisp(fid,X);
 			fclose(fid);
+			
 		end
 		% only increment class if images were actually added!
 		if ~(added == 0)
 			n = n + 1;
 		end
 	end
-
 end
 
 function L = list_files(path)
