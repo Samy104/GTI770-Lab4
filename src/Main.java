@@ -55,7 +55,11 @@ public class Main {
 	
 	public static void EntrainerModele(Matrix ent)
 	{
-		func.Fisherfaces.WPCA(ent);
+		PCA z = new PCA(ent);
+		z.Calculate();
+		Matrix eigen = func.Fisherfaces.computeEigen(z.Z);
+		//eigen.print(1, 0);
+		//func.Fisherfaces.WPCA(eigen);
 	}
 	
 	public static void EvaluerModele(Matrix ev)

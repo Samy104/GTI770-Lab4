@@ -59,13 +59,13 @@ public class Fisherfaces {
 	public static Matrix WPCA(Matrix W)
 	{
 		
-		System.out.println(W.getMatrix(0, 0, 0 , W.getColumnDimension()-1).times(ScatterMatrix(W).times(W.getMatrix(0, 0,0 , W.getColumnDimension()-1).transpose())).det());
 		Matrix wpca = new Matrix(0, W.getRowDimension());
 		
 		for(int row = 0; row < W.getRowDimension(); row++)
 		{
-			//Matrix wpca = W.times(ScatterMatrix(W).times(W.transpose()));
+			System.out.println(W.getMatrix(0, 0, 0 , W.getColumnDimension()-1).times(ScatterMatrix(W).times(W.getMatrix(0, 0,0 , W.getColumnDimension()-1).transpose())).det());
 		}
+		//Matrix wpca = W.times(ScatterMatrix(W).times(W.transpose()));
 		//System.out.println("Rows " + wpca.getRowDimension() + " Cols " + wpca.getColumnDimension());
 		//int col = func.Fonctions.getMaxDet(wpca);		
 		//return wpca.getMatrix(0, wpca.getRowDimension()-1, col, col);
@@ -91,5 +91,26 @@ public class Fisherfaces {
 		System.out.println(wopt.getColumnDimension()+"  "+wopt.getRowDimension());
 		int col = func.Fonctions.getMaxDet(W);
 		return wopt.getMatrix(0, wopt.getRowDimension()-1, col, col);
+	}
+
+	public static Matrix computeEigen(Matrix X) {
+		// Matrix Y is the matrix R that indicates the end result AKA the class for each column/image
+		// 
+		Matrix R = new Matrix(X.getColumnDimension(),1);
+		for(int row = 0; row < X.getColumnDimension(); row++)
+		{
+			R.set(row, 0, (row-func.Fonctions.numberClasses)%func.Fonctions.numberClasses+1);
+		}
+		
+		// Now using Rk = WT * Xk we must get the single row containing 
+		// the determining attribute relative to the image.
+		// The formula will be WT = Xk.transpose.times(Rk) Where K is the current image
+		Matrix W = new Matrix(1,X.getColumnDimension());
+		for(int inc = 0; inc < W.getColumnDimension(); inc++)
+		{
+			double factor = 0;
+			W.set(1, inc, factor);
+		}
+		return R;
 	}
 }

@@ -114,8 +114,22 @@ public class Fonctions {
 						
 						img = ImageIO.read(fis);
 						if(img != null){
-							System.out.println("File to matrix: " + file.getName());
-							Matrix matrixToAdd = MatrixToColumnMatrix(FileManager.convertPGMtoMatrix(file.getAbsolutePath(),img.getHeight(),img.getWidth()));
+							
+							//System.out.println("File to matrix: " + file.getName());
+							Matrix matrixToAdd = MatrixToColumnMatrix(FileManager.convertPGMtoMatrix(img,img.getHeight(),img.getWidth()));
+							PrintWriter write = null;
+							
+							try
+							{
+								write = new PrintWriter("Output/single.txt", "UTF-8");
+								matrixToAdd.print(write,1,0);
+								
+								
+							}
+							catch (IOException e)
+							{
+								e.printStackTrace();
+							}
 							if(collectionOfFiles == null){
 								collectionOfFiles = matrixToAdd;
 							}
