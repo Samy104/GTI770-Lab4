@@ -15,7 +15,7 @@ public class Fisherfaces {
 		return func.Fonctions.GenerateScatterMatrix(W);
 	}
 	
-	public static Matrix BetweenScatterMatrix(Matrix W)
+	public static Matrix WithinScatterMatrix(Matrix W)
 	{
 		Matrix mean = new Matrix(W.getColumnDimension(),W.getRowDimension());
 		int n = W.getColumnDimension() / func.Fonctions.numberClasses;
@@ -37,7 +37,7 @@ public class Fisherfaces {
 		return mean.transpose().times(mean);
 	}
 	
-	public static Matrix WithinScatterMatrix(Matrix W)
+	public static Matrix BetweenScatterMatrix(Matrix W)
 	{
 		Matrix mean = new Matrix(W.getColumnDimension(),1);
 		int n = W.getColumnDimension() / func.Fonctions.numberClasses;
@@ -58,9 +58,18 @@ public class Fisherfaces {
 	
 	public static Matrix WPCA(Matrix W)
 	{
-		Matrix wpca = W.times(ScatterMatrix(W).times(W.transpose()));
-		int col = func.Fonctions.getMaxDet(wpca);		
-		return wpca.getMatrix(0, wpca.getRowDimension()-1, col, col);
+		
+		System.out.println(W.getMatrix(0, 0, 0 , W.getColumnDimension()-1).times(ScatterMatrix(W).times(W.getMatrix(0, 0,0 , W.getColumnDimension()-1).transpose())).det());
+		Matrix wpca = new Matrix(0, W.getRowDimension());
+		
+		for(int row = 0; row < W.getRowDimension(); row++)
+		{
+			//Matrix wpca = W.times(ScatterMatrix(W).times(W.transpose()));
+		}
+		//System.out.println("Rows " + wpca.getRowDimension() + " Cols " + wpca.getColumnDimension());
+		//int col = func.Fonctions.getMaxDet(wpca);		
+		//return wpca.getMatrix(0, wpca.getRowDimension()-1, col, col);
+		return null;
 	}
 	
 	public static Matrix WFLD(Matrix W)
@@ -78,7 +87,8 @@ public class Fisherfaces {
 	
 	public static Matrix WOPT(Matrix W)
 	{
-		Matrix wopt = WPCA(W).inverse().times(WFLD(W).inverse()).inverse();
+		Matrix wopt = W.times(BetweenScatterMatrix(W).times(W.transpose()));
+		System.out.println(wopt.getColumnDimension()+"  "+wopt.getRowDimension());
 		int col = func.Fonctions.getMaxDet(W);
 		return wopt.getMatrix(0, wopt.getRowDimension()-1, col, col);
 	}

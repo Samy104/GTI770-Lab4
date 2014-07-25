@@ -24,8 +24,8 @@ public class Main {
 		//Matrix wOut = func.Fisherfaces.WithinScatterMatrix(preparedMatrix);
 		//System.out.println(wBet.get(0,0));
 		//System.out.println(wOut.get(0, 0));
-		Matrix wPca = func.Fisherfaces.WFLD(preparedMatrix);
-		System.out.println(wPca.getColumnDimension()+"  "+wPca.getRowDimension());
+		//Matrix wPca = func.Fisherfaces.WFLD(preparedMatrix);
+		//System.out.println(wPca.getColumnDimension()+"  "+wPca.getRowDimension());
 		//wPca.print(10,2);
 		// Cross Validation
 		Validate(preparedMatrix);
@@ -33,6 +33,7 @@ public class Main {
 
 	public static void Validate(Matrix preparedMatrix)
 	{
+		
 		ArrayList<Matrix> matrixArray = new ArrayList<Matrix>();
 		// Prepare Matrices
 		for(int k = 0; k < 10; k++)
@@ -46,7 +47,7 @@ public class Main {
 		double variance = 0;
 		for(int k = 0; k < 10 ; k++)
 		{
-			System.out.println("Mean total for k interation " + k + " " +func.Fonctions.meanTotal(func.Fonctions.aggregateExceptOne(matrixArray, k)));
+			//System.out.println("Mean total for k interation " + k + " " +func.Fonctions.meanTotal(func.Fonctions.aggregateExceptOne(matrixArray, k)));
 			EntrainerModele(func.Fonctions.aggregateExceptOne(matrixArray, k));
 			EvaluerModele(matrixArray.get(k));
 		}
@@ -54,7 +55,7 @@ public class Main {
 	
 	public static void EntrainerModele(Matrix ent)
 	{
-		
+		func.Fisherfaces.WPCA(ent);
 	}
 	
 	public static void EvaluerModele(Matrix ev)

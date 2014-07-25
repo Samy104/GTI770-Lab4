@@ -153,7 +153,7 @@ public class Fonctions {
 		
 		for(int col = 0; col < x.getColumnDimension(); col++)
 		{
-			System.out.println(x.getRowDimension());
+			//System.out.println(x.getRowDimension() + " " + x.getColumnDimension());
 			double det = x.getMatrix(0, x.getRowDimension()-1, col, col).det();
 			index = (det > max) ? col : index;
 			max = (det > max) ? det : max;
@@ -384,16 +384,15 @@ public class Fonctions {
 	 */
 	public static Matrix aggregateExceptOne(ArrayList<Matrix> agg, int theone)
 	{
-		Matrix aggregation = new Matrix(225,2);
+		Matrix aggregation = new Matrix(agg.get(0).getRowDimension(),(agg.size()-1)*func.Fonctions.numberClasses);
 		int currentPos = 0;
-		int[] col = {0,1};
 		
 		for(int i = 1; i < 10; i++)
 		{
 			if(theone != i)
 			{
-				aggregation.setMatrix(currentPos,(currentPos+24), col, agg.get(i));
-				currentPos += 25;
+				aggregation.setMatrix(currentPos,(currentPos+func.Fonctions.numberClasses-1), 0, func.Fonctions.numberClasses-1, agg.get(i));
+				currentPos += func.Fonctions.numberClasses;
 			}
 			
 		}
