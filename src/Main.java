@@ -30,20 +30,29 @@ public class Main {
 			}
 		
 			
-
-		/*	PrintWriter write = null;
-			try {
-				write = new PrintWriter(new File("Output/allMatrix.txt"));
-				preparedMatrix.print(write, preparedMatrix.getColumnDimension(), 0);
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		//System.out.println("Rows: "+preparedMatrix.getRowDimension()+" Columns: " + preparedMatrix.getColumnDimension());
+		
+		//Print Matrix out to a file
+		
+		PrintWriter printer = null;
+		try{
+			printer = new PrintWriter("Output/fileTest.txt");
+			for(int i = 0; i<preparedMatrix.getRowDimension(); i++){
+				printer.println();
+				for(int j = 0; j<preparedMatrix.getColumnDimension(); j++){
+					printer.print(preparedMatrix.get(i, j) + " ");
+				}
 			}
-			finally{
-				write.close();
-			}*/
-			
-			System.out.println("Rows: "+preparedMatrix.getRowDimension()+" Columns: " + preparedMatrix.getColumnDimension());
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		Matrix xBar = func.Fonctions.CalculateCenteredMatrix(preparedMatrix);
+		func.Fonctions.printMatrix(xBar,"Output/averagesImages.txt");
+		
+		PCA pcaTest = new PCA(xBar);
+		pcaTest.Calculate();
+		
 		//Matrix wBet = func.Fisherfaces.BetweenScatterMatrix(preparedMatrix);
 		//Matrix wOut = func.Fisherfaces.WithinScatterMatrix(preparedMatrix);
 		//System.out.println(wBet.get(0,0));
@@ -52,9 +61,13 @@ public class Main {
 		//System.out.println(wPca.getColumnDimension()+"  "+wPca.getRowDimension());
 		//wPca.print(10,2);
 		// Cross Validation
-		Validate(preparedMatrix);
+		
+		
+		//CheckIfWorks(preparedMatrix);
+		//Validate(preparedMatrix);
+		//CheckIfWorks(preparedMatrix);
 	}
-
+	
 	public static void Validate(Matrix preparedMatrix)
 	{
 		ArrayList<Matrix> matrixArray = new ArrayList<Matrix>();
@@ -73,7 +86,11 @@ public class Main {
 		for(int k = 0; k < 10 ; k++)
 		{
 			//System.out.println("Mean total for k interation " + k + " " +func.Fonctions.meanTotal(func.Fonctions.aggregateExceptOne(matrixArray, k)));
-			PCA toTrain = new PCA(func.Fonctions.aggregateExceptOne(matrixArray, k));
+			Matrix x = func.Fonctions.aggregateExceptOne(matrixArray, k);
+
+			System.out.println(x.getRowDimension() + " " + x.getColumnDimension());
+			PCA toTrain = new PCA(x);
+			
 			toTrain.Calculate();
 			Matrix toTrainProjected = toTrain.getProjectedMatrix();
 			EntrainerModele(toTrainProjected);
@@ -83,19 +100,7 @@ public class Main {
 	
 	public static void EntrainerModele(Matrix ent)
 	{
-		
-		PrintWriter write = null;
-		try {
-			write = new PrintWriter(new File("Output/allMatrix.txt"));
-			ent.print(write, ent.getColumnDimension(), 0);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		finally{
-			write.close();
-		}
-		
+				
 		//Matrix eigen = func.Fisherfaces.computeEigen(z.Z);
 		//eigen.print(1, 0);
 		//func.Fisherfaces.WPCA(eigen);

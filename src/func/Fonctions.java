@@ -82,19 +82,19 @@ public class Fonctions {
 	private static Matrix GetMatrixFromFile(String fileString, int picWidth, int picHeight) {
 	
 			Matrix matrix = new Matrix(picWidth*picHeight,1);
-			double[] futureMatrix = new double[picWidth*picHeight];
 		    try 
 		    {
 		    	Scanner scanner = new Scanner(new File(fileString));
 
-		        for(int i = 0; i < futureMatrix.length; i++) 
+		        for(int i = 0; i < matrix.getRowDimension()-1; i++) 
 		        {
-		            matrix.set(i, 0, scanner.nextInt());
+		        	int valeur = scanner.nextInt();
+		            matrix.set(i, 0, valeur);
 		        }
 		    } 
 		    catch(Exception ex)
 		    {
-		    	System.out.println(ex.getMessage());
+		    	ex.printStackTrace();
 		    }
 			
 		    
@@ -118,6 +118,23 @@ public class Fonctions {
 		
 		return index;
 	}
+	
+	
+public static Matrix CalculateCenteredMatrix(Matrix x){	
+		
+		Matrix xBar = new Matrix(x.getRowDimension(), x.getColumnDimension());
+		double average;
+		for(int j = 0; j < x.getColumnDimension();j++){
+			average = mean(x,j);
+			for(int i = 0; i < x.getRowDimension();i++){
+				double meanTest = (x.get(i, j) - average);
+				xBar.set(i, j,meanTest);	
+			}
+		}
+		
+		return (xBar);
+	}
+	
 	public static Matrix GenerateScatterMatrix(Matrix x){	
 		
 		Matrix xBar = new Matrix(x.getRowDimension(), x.getColumnDimension());
@@ -126,12 +143,11 @@ public class Fonctions {
 			average = mean(x,j);
 			for(int i = 0; i < x.getRowDimension();i++){
 				double meanTest = (x.get(i, j) - average);
-				xBar.set(i, j,meanTest);
-				
+				xBar.set(i, j,meanTest);	
 			}
 		}
 		
-		return (xBar.transpose().times(xBar)).times(1.d/x.getRowDimension());
+		return (xBar.transpose().times(xBar));
 	}
 	public static double mean(Matrix x, int column)
 	{
@@ -383,4 +399,23 @@ public class Fonctions {
 		
 		return augmentedMatrix;
 	}
+	
+
+
+	public static void printMatrix(Matrix theMatrix,String path){		
+		PrintWriter printer = null;
+		try{
+			printer = new PrintWriter(path);
+			for(int i = 0; i<theMatrix.getRowDimension(); i++){
+				printer.println();
+				for(int j = 0; j<theMatrix.getColumnDimension(); j++){
+					printer.print(theMatrix.get(i, j) + " ");
+				}
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+	}
+	
 }

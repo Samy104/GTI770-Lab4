@@ -1,11 +1,11 @@
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
 
+import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
+import Jama.SingularValueDecomposition;
 
 public class PCA {
 
@@ -29,10 +29,38 @@ public class PCA {
 	public void Calculate()
 	{
 		
-		this.xBar = func.Fonctions.GenerateScatterMatrix(xMatrix);
-		this.matriceDeCovariance = xBar.transpose().times(xBar);
+		/*this.xBar = func.Fonctions.GenerateScatterMatrix(xMatrix);
+		this.matriceDeCovariance = xBar;
+		*/
+		this.matriceDeCovariance = (xMatrix.transpose()).times(xMatrix);
+		/*Matrix D = matriceDeCovariance.eig().getD();
+		Matrix VecteursV = xMatrix.times(D);*/
 		
-		printToFile("Output/datMatrix.txt");
+		//Matrix S = xMatrix.svd().getS();
+		//Matrix V = xMatrix.svd().getV();
+		//Matrix U = xMatrix.svd().getU();
+		
+		Matrix V2 = vecteurPropre(xMatrix);
+		func.Fonctions.printMatrix(xMatrix, "Output/XbarCentered.txt");
+		
+		//func.Fonctions.printMatrix(S, "Output/S.txt");
+		//func.Fonctions.printMatrix(V, "Output/V.txt");
+		//func.Fonctions.printMatrix(U, "Output/U.txt");
+		
+		
+		//Matrix vecteurPropre = xMatrix.times(vecteurPropre(xMatrix));
+		Matrix swapped = getSwappedDIAGMatrix(diagonal(xMatrix));
+		
+		calculatePrincipauxVec(swapped,xMatrix);
+		
+		func.Fonctions.printMatrix(xMatrix.times(swapped),"Output/Testing.txt");
+		
+		System.out.println(matriceDeCovariance.getRowDimension() + " " +matriceDeCovariance.getColumnDimension());
+		
+		this.Z = xMatrix.times(swapped);
+		//Matrix W = matriceDeCovariance.times(vecteurPropre);
+		//func.Fonctions.printMatrix(W, "Output/WMatrix.txt");
+		//printToFile("Output/datMatrix.txt");
 		
 	}
 	
@@ -139,23 +167,63 @@ public class PCA {
 		{
 			write = new PrintWriter(path, "UTF-8");
 			
-			write.append("Matrice de Covariance:" + matriceDeCovariance.getRowDimension() + " " + matriceDeCovariance.getColumnDimension());
-			this.matriceDeCovariance.print(write, matriceDeCovariance.getColumnDimension(),4);
-			
-			write.append("Vecteur Propre:" );
-			vecteurPropre(matriceDeCovariance).print(write, 5, 3);
-			
-
-			write.append("Diagonal: " );
-			diagonal(matriceDeCovariance).print(write, 5, 8);
-			getSwappedDIAGMatrix(diagonal(matriceDeCovariance)).print(write, 5, 8);
-			
-			write.append("Vecteur Propre Transpose:" );
-			vecPTranspose(matriceDeCovariance).print(write, 5, 3);
+			write.append("XBAR CENTREE");
+			for(int i = 0; i < xBar.getRowDimension(); i++){
+				write.println();
+				for(int j = 0; j<xBar.getColumnDimension(); j++){
+					write.print(xBar.get(i, j) + " ");
+				}
+			}
 			
 			Matrix swapped = getSwappedDIAGMatrix(diagonal(matriceDeCovariance));
 			
 			calculatePrincipauxVec(swapped,matriceDeCovariance);
+			
+			
+			write.append("matrice de cov");
+			//Matrice de cov
+			for(int i = 0; i < matriceDeCovariance.getRowDimension(); i++){
+				write.println();
+				for(int j = 0; j<matriceDeCovariance.getColumnDimension(); j++){
+					write.print(matriceDeCovariance.get(i, j) + " ");
+				}
+			}
+			
+			//Vecteur Propre
+			
+			for(int i = 0; i < vecteurPropre(matriceDeCovariance).getRowDimension(); i++){
+				write.println();
+				for(int j = 0; j < vecteurPropre(matriceDeCovariance).getColumnDimension(); j++){
+					write.print(vecteurPropre(matriceDeCovariance).get(i, j) + " ");
+				}
+			}
+			
+			//VP Transpose
+			
+			for(int i = 0; i < vecPTranspose(matriceDeCovariance).getRowDimension(); i++){
+				write.println();
+				for(int j = 0; j<vecPTranspose(matriceDeCovariance).getColumnDimension(); j++){
+					write.print(vecPTranspose(matriceDeCovariance).get(i, j) + " ");
+				}
+			}
+			
+			//Diagonal
+			
+			for(int i = 0; i < diagonal(matriceDeCovariance).getRowDimension(); i++){
+				write.println();
+				for(int j = 0; j<diagonal(matriceDeCovariance).getColumnDimension(); j++){
+					write.print(diagonal(matriceDeCovariance).get(i, j) + " ");
+				}
+			}
+			
+			//Z
+			
+			for(int i = 0; i < getXbar().times(principauxVecteurs).getRowDimension(); i++){
+				write.println();
+				for(int j = 0; j<getXbar().times(principauxVecteurs).getColumnDimension(); j++){
+					write.print(getXbar().times(principauxVecteurs).get(i, j) + " ");
+				}
+			}
 			
 			// Do the shit for task 1-5: Projeter dans le sous espace de K Z= Xmoyenne*Vk
 			
@@ -168,6 +236,8 @@ public class PCA {
 		catch (IOException e)
 		{
 			e.printStackTrace();
+		}finally{
+			write.close();
 		}
 		
 	}
