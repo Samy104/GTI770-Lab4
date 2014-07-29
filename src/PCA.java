@@ -31,7 +31,7 @@ public class PCA {
 	public void Calculate()
 	{
 		
-		this.xBar = func.Fonctions.GenerateScatterMatrix(xMatrix);
+		this.xBar = func.Fonctions.CalculateCenteredMatrix(xMatrix);
 		/*this.matriceDeCovariance = xBar;
 		*/
 		this.matriceDeCovariance = xMatrix.times(xMatrix.transpose());

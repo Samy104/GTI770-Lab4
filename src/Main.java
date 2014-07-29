@@ -78,32 +78,30 @@ public class Main {
 			matrixArray.add(k,func.Fonctions.AppendRecursively(preparedMatrix, k, 40));
 		}
 		
-		
-		
 		//Validate
 		double mean = 0;
 		double variance = 0;
 		for(int k = 0; k < 10 ; k++)
 		{
 			//System.out.println("Mean total for k interation " + k + " " +func.Fonctions.meanTotal(func.Fonctions.aggregateExceptOne(matrixArray, k)));
-			Matrix x = func.Fonctions.aggregateExceptOne(matrixArray, k);
-
-			System.out.println(x.getRowDimension() + " " + x.getColumnDimension());
-			PCA toTrain = new PCA(x);
-			
-			toTrain.Calculate();
-			Matrix toTrainProjected = toTrain.getProjectedMatrix();
-			EntrainerModele(toTrainProjected);
+		
+			EntrainerModele(func.Fonctions.aggregateExceptOne(matrixArray, k));
 			EvaluerModele(matrixArray.get(k));
 		}
 	}
 	
 	public static void EntrainerModele(Matrix ent)
 	{
-				
-		//Matrix eigen = func.Fisherfaces.computeEigen(z.Z);
-		//eigen.print(1, 0);
-		//func.Fisherfaces.WPCA(eigen);
+		// With the given matrix to train calculate the new PCA
+		PCA toTrain = new PCA(ent);
+		toTrain.Calculate();
+		Matrix toTrainProjected = toTrain.getProjectedMatrix();
+		
+		// Having the new PCA get the Fisher
+		// We need to store the return to a variable for EvaluerModele
+		func.Fisherfaces.WPCA(toTrainProjected);
+		
+		
 	}
 	
 	public static void EvaluerModele(Matrix ev)

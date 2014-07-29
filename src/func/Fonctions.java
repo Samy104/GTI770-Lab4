@@ -120,7 +120,7 @@ public class Fonctions {
 	}
 	
 	
-public static Matrix CalculateCenteredMatrix(Matrix x){	
+	public static Matrix CalculateCenteredMatrix(Matrix x){	
 		
 		Matrix xBar = new Matrix(x.getRowDimension(), x.getColumnDimension());
 		double average;
