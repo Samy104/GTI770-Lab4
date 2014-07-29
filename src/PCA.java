@@ -1,7 +1,9 @@
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 
 import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
@@ -18,7 +20,7 @@ public class PCA {
 	
 	Matrix principauxVecteurs = null;
 	Matrix Z = null;
-
+	Double[][] OrderedMatrices;
 	
 
 	public PCA (Matrix main)
@@ -29,10 +31,10 @@ public class PCA {
 	public void Calculate()
 	{
 		
-		/*this.xBar = func.Fonctions.GenerateScatterMatrix(xMatrix);
-		this.matriceDeCovariance = xBar;
+		this.xBar = func.Fonctions.GenerateScatterMatrix(xMatrix);
+		/*this.matriceDeCovariance = xBar;
 		*/
-		this.matriceDeCovariance = (xMatrix.transpose()).times(xMatrix);
+		this.matriceDeCovariance = xMatrix.times(xMatrix.transpose());
 		/*Matrix D = matriceDeCovariance.eig().getD();
 		Matrix VecteursV = xMatrix.times(D);*/
 		
@@ -41,7 +43,7 @@ public class PCA {
 		//Matrix U = xMatrix.svd().getU();
 		
 		Matrix V2 = vecteurPropre(xMatrix);
-		func.Fonctions.printMatrix(xMatrix, "Output/XbarCentered.txt");
+		func.Fonctions.printMatrix(V2, "Output/XbarCentered.txt");
 		
 		//func.Fonctions.printMatrix(S, "Output/S.txt");
 		//func.Fonctions.printMatrix(V, "Output/V.txt");
@@ -50,14 +52,15 @@ public class PCA {
 		
 		//Matrix vecteurPropre = xMatrix.times(vecteurPropre(xMatrix));
 		Matrix swapped = getSwappedDIAGMatrix(diagonal(xMatrix));
-		
+		//swapped.print(2, 6);
 		calculatePrincipauxVec(swapped,xMatrix);
 		
 		func.Fonctions.printMatrix(xMatrix.times(swapped),"Output/Testing.txt");
 		
-		System.out.println(matriceDeCovariance.getRowDimension() + " " +matriceDeCovariance.getColumnDimension());
 		
-		this.Z = xMatrix.times(swapped);
+		Matrix Wk = principauxVecteurs.times(getXbar().transpose());
+		this.Z = Wk.times(getXbar());
+		System.out.println(this.Z.getRowDimension() + " " +this.Z.getColumnDimension());
 		//Matrix W = matriceDeCovariance.times(vecteurPropre);
 		//func.Fonctions.printMatrix(W, "Output/WMatrix.txt");
 		//printToFile("Output/datMatrix.txt");
@@ -72,8 +75,11 @@ public class PCA {
 		}
 		i++;
 		
-		principauxVecteurs = vecteurPropre(matriceDeCov).getMatrix(0, vecteurPropre(matriceDeCov).getRowDimension()-1,
-				vecteurPropre(matriceDeCov).getColumnDimension()-i, vecteurPropre(matriceDeCov).getColumnDimension()-1);
+		
+		System.out.println("Number of principaux vectors is " + i);
+		Matrix vecProp = vecteurPropre(matriceDeCov);
+		// principauxVecteurs = vecProp.getMatrix(0, vecProp.getRowDimension()-1, vecProp.getColumnDimension()-1-i, vecProp.getColumnDimension()-1);
+		principauxVecteurs = getFirstIPrincVec(vecProp, i);
 	
 	//System.out.println("Vecteurs propres choisi: ");
 	//principauxVecteurs.print(i, 8);
@@ -82,6 +88,22 @@ public class PCA {
 	
 
 	
+	private Matrix getFirstIPrincVec(Matrix propre, int i) {
+		// TODO Auto-generated method stub
+		
+		Matrix vecTot = new Matrix(i,propre.getColumnDimension());
+		
+		for(int currentPixel = 0; currentPixel < i; currentPixel++)
+		{
+			// Track current i from OrderedMatrices then get position it is at now and add it to the Matrix
+			int currentPrincipaux = OrderedMatrices[i][1].intValue()-1;
+			
+			vecTot.setMatrix(currentPixel, currentPixel, 0, propre.getColumnDimension()-1, propre.getMatrix(OrderedMatrices[currentPrincipaux][1].intValue()-1, OrderedMatrices[currentPrincipaux][1].intValue()-1, 0, propre.getColumnDimension()-1));
+		}
+		
+		return vecTot;
+	}
+
 	public Matrix vecteurPropre(Matrix matriceDeCovariance){		
 		return matriceDeCovariance.eig().getV();	
 	}
@@ -107,17 +129,24 @@ public class PCA {
 	{
 		Matrix exit = new Matrix(start.getRowDimension(),start.getColumnDimension());
 		
-		Double[] sort = new Double[start.getRowDimension()];
+		OrderedMatrices = new Double[start.getRowDimension()][2];
 		
 		for(int i = 0; i < start.getRowDimension(); i++)
 		{
-			sort[i] = start.get(i,i);
+			OrderedMatrices[i][0] = Math.abs(start.get(i,i));
+			OrderedMatrices[i][1] = (double) i;
 		}
-		Arrays.sort(sort, Collections.reverseOrder());
+		Arrays.sort(OrderedMatrices, 
+				new Comparator<Double[]>() {
+			        @Override
+			        public int compare(Double[] o1, Double[] o2) {
+			            return o2[0].compareTo(o1[0]);
+			        }
+			    });
 		
 		for(int i = 0; i < start.getRowDimension(); i++)
 		{
-			exit.set(i, i, sort[i]);
+			exit.set(i, i, OrderedMatrices[i][0]);
 		}
 		
 		return exit;
