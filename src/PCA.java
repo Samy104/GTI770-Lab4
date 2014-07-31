@@ -167,7 +167,7 @@ public class PCA {
 			}
 			denum += from.get(i, i);
 		}
-		System.out.println("Pourcentage de alpha: " + (num/denum));
+		//System.out.println("Pourcentage de alpha: " + (num/denum));
 		decision = (num/denum >= 0.9) ? true : false;
 		
 		return decision;

@@ -1,5 +1,7 @@
 package func;
 
+import javax.annotation.Generated;
+
 import Jama.Matrix;
 
 /*
@@ -7,6 +9,10 @@ import Jama.Matrix;
  * 
  */
 public class Fisherfaces {
+	
+	private static Matrix betweenScatterEntrainer = null;
+	private static Matrix withinScatterEntrainer = null;
+	private static Matrix[] scatterEntrainer = new Matrix[func.Fonctions.numberClasses];
 	
 	private Fisherfaces(){}
 
@@ -59,58 +65,84 @@ public class Fisherfaces {
 	public static Matrix WPCA(Matrix W)
 	{
 		
-		Matrix wpca = new Matrix(0, W.getRowDimension());
+		/*Matrix wpca = new Matrix(0, W.getRowDimension());
 		
 		for(int row = 0; row < W.getRowDimension(); row++)
 		{
 			System.out.println(W.getMatrix(0, 0, 0 , W.getColumnDimension()-1).times(ScatterMatrix(W).times(W.getMatrix(0, 0,0 , W.getColumnDimension()-1).transpose())).det());
-		}
+		}*/
+		
 		//Matrix wpca = W.times(ScatterMatrix(W).times(W.transpose()));
 		//System.out.println("Rows " + wpca.getRowDimension() + " Cols " + wpca.getColumnDimension());
-		//int col = func.Fonctions.getMaxDet(wpca);		
-		//return wpca.getMatrix(0, wpca.getRowDimension()-1, col, col);
-		return null;
+		//int col = func.Fonctions.getMaxDet(wpca);
+		double det=-9999;
+		Matrix bestClass = null;
+		for(int count = 0; count < func.Fonctions.numberClasses;count++)
+		{
+			Matrix oneClass = GetClass(count, W);
+			Matrix wpca = oneClass.times(scatterEntrainer[count].times(oneClass.transpose()));
+			double currentDet = wpca.det();
+			det = (currentDet > det) ? currentDet : det;
+			bestClass = (currentDet > det) ? wpca : bestClass;
+		}
+		System.out.println("Le meilleur det est : " + det);	
+		return bestClass;
 	}
 	
+	private static Matrix GetClass(int i, Matrix w) {
+		int maxShifts = w.getColumnDimension()/func.Fonctions.numberClasses;
+		Matrix newMatrix = new Matrix(w.getRowDimension(),maxShifts);
+		int currentShift = 0;
+		for(int currentNewPosition = i%(w.getColumnDimension()/func.Fonctions.numberClasses); currentShift < maxShifts; currentNewPosition++)
+		{
+			newMatrix.setMatrix(0, w.getRowDimension()-1, currentNewPosition, currentNewPosition, 
+					w.getMatrix(0, w.getRowDimension()-1, currentShift, currentShift));
+			currentShift+=func.Fonctions.numberClasses;
+		}
+		return newMatrix;
+	}
+
 	public static Matrix WFLD(Matrix W)
 	{
 		Matrix wpca = WPCA(W);
-		Matrix num = W.times(wpca.times(BetweenScatterMatrix(W).times(wpca.transpose().times(W.transpose()))));
-		Matrix denum = W.times(wpca.times(WithinScatterMatrix(W).times(wpca.transpose().times(W.transpose()))));
-		// Reminder X/Y = X*Y^⁻1
-		Matrix wfld = num.times(denum.transpose());
-		int col = func.Fonctions.getMaxDet(wfld);
-		wfld = wfld.getMatrix(0, wfld.getRowDimension()-1, col, col);
 		
-		return wfld;
+		double det=-9999;
+		Matrix bestClass = null;
+		for(int count = 0; count < func.Fonctions.numberClasses;count++)
+		{
+			Matrix oneClass = GetClass(count, W);
+			Matrix num = oneClass.times(wpca.times(betweenScatterEntrainer.times(wpca.transpose().times(oneClass.transpose()))));
+			Matrix denum = oneClass.times(wpca.times(withinScatterEntrainer.times(wpca.transpose().times(oneClass.transpose()))));
+			
+			Matrix wfld = num.times(denum.transpose());
+			double currentDet = wfld.det();
+			det = (currentDet > det) ? currentDet : det;
+			bestClass = (currentDet > det) ? wfld : bestClass;
+		}
+		System.out.println("Le meilleur det est : " + det);
+		return bestClass;
 	}
 	
-	public static Matrix WOPT(Matrix W)
+	public static Matrix WOPT(Matrix W, boolean entrainement)
 	{
-		Matrix wopt = W.times(BetweenScatterMatrix(W).times(W.transpose()));
-		System.out.println(wopt.getColumnDimension()+"  "+wopt.getRowDimension());
-		int col = func.Fonctions.getMaxDet(W);
-		return wopt.getMatrix(0, wopt.getRowDimension()-1, col, col);
-	}
-
-	public static Matrix computeEigen(Matrix X) {
-		// Matrix Y is the matrix R that indicates the end result AKA the class for each column/image
-		// 
-		Matrix R = new Matrix(X.getColumnDimension(),1);
-		for(int row = 0; row < X.getColumnDimension(); row++)
+		// Method 1
+		//Matrix wopt = W.times(BetweenScatterMatrix(W).times(W.transpose()));
+		//int col = func.Fonctions.getMaxDet(W);
+		//return wopt.getMatrix(0, wopt.getRowDimension()-1, col, col);
+		// If it is training, generate the scatter matrices
+		if(entrainement)
 		{
-			R.set(row, 0, (row-func.Fonctions.numberClasses)%func.Fonctions.numberClasses+1);
+			for(int count = 0; count < func.Fonctions.numberClasses; count++)
+			{
+				scatterEntrainer[count] = ScatterMatrix(GetClass(count,W));
+			}
+			
+			betweenScatterEntrainer = BetweenScatterMatrix(W);
+			withinScatterEntrainer = WithinScatterMatrix(W);
 		}
-		
-		// Now using Rk = WT * Xk we must get the single row containing 
-		// the determining attribute relative to the image.
-		// The formula will be WT = Xk.transpose.times(Rk) Where K is the current image
-		Matrix W = new Matrix(1,X.getColumnDimension());
-		for(int inc = 0; inc < W.getColumnDimension(); inc++)
-		{
-			double factor = 0;
-			W.set(1, inc, factor);
-		}
-		return R;
+		// Method 2
+		return WPCA(W).transpose().times(WFLD(W).transpose()).transpose();
 	}
+	
+	
 }

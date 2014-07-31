@@ -20,6 +20,8 @@ public class Main {
 	 * 
 	 */
 	
+	private static Matrix wopt;
+	
 	public static void main(String[] args) {
 		Matrix preparedMatrix = null;
 			try {
@@ -34,7 +36,7 @@ public class Main {
 		
 		//Print Matrix out to a file
 		
-		PrintWriter printer = null;
+		/*PrintWriter printer = null;
 		try{
 			printer = new PrintWriter("Output/fileTest.txt");
 			for(int i = 0; i<preparedMatrix.getRowDimension(); i++){
@@ -52,7 +54,7 @@ public class Main {
 		
 		PCA pcaTest = new PCA(xBar);
 		pcaTest.Calculate();
-		
+		*/
 		//Matrix wBet = func.Fisherfaces.BetweenScatterMatrix(preparedMatrix);
 		//Matrix wOut = func.Fisherfaces.WithinScatterMatrix(preparedMatrix);
 		//System.out.println(wBet.get(0,0));
@@ -64,7 +66,7 @@ public class Main {
 		
 		
 		//CheckIfWorks(preparedMatrix);
-		//Validate(preparedMatrix);
+		Validate(preparedMatrix);
 		//CheckIfWorks(preparedMatrix);
 	}
 	
@@ -84,28 +86,36 @@ public class Main {
 		for(int k = 0; k < 10 ; k++)
 		{
 			//System.out.println("Mean total for k interation " + k + " " +func.Fonctions.meanTotal(func.Fonctions.aggregateExceptOne(matrixArray, k)));
-		
+			System.out.println("Debut de l'entrainement");
 			EntrainerModele(func.Fonctions.aggregateExceptOne(matrixArray, k));
-			EvaluerModele(matrixArray.get(k));
+			System.out.println("Fin de l'entrainement");
+			System.out.println("Debut du test");
+			//EvaluerModele(matrixArray.get(k));
+			System.out.println("Fin du test");
 		}
 	}
 	
 	public static void EntrainerModele(Matrix ent)
 	{
+		System.out.println(ent.getRowDimension() + "  :   " + ent.getColumnDimension());
 		// With the given matrix to train calculate the new PCA
 		PCA toTrain = new PCA(ent);
 		toTrain.Calculate();
 		Matrix toTrainProjected = toTrain.getProjectedMatrix();
-		
+		func.Fonctions.printMatrix(toTrainProjected,"Output/reduite.txt");
+		toTrainProjected.print(2, 2);
 		// Having the new PCA get the Fisher
 		// We need to store the return to a variable for EvaluerModele
-		func.Fisherfaces.WPCA(toTrainProjected);
-		
-		
+		wopt = func.Fisherfaces.WOPT(toTrainProjected, true);
+		System.out.println("WOPT rows: " + wopt.getRowDimension() + " cols: " + wopt.getColumnDimension());
 	}
 	
 	public static void EvaluerModele(Matrix ev)
 	{
+		// Reduce the dimensions to fit with the old
+		PCA toTest = new PCA(ev);
+		toTest.Calculate();
+		Matrix toTestProjected = toTest.getProjectedMatrix();
 		
 	}
 }
