@@ -10,9 +10,6 @@ import Jama.Matrix;
  */
 public class Fisherfaces {
 	
-	private static Matrix betweenScatterEntrainer = null;
-	private static Matrix withinScatterEntrainer = null;
-	private static Matrix[] scatterEntrainer = new Matrix[func.Fonctions.numberClasses];
 	
 	private Fisherfaces(){}
 
@@ -23,72 +20,118 @@ public class Fisherfaces {
 	
 	public static Matrix WithinScatterMatrix(Matrix W)
 	{
-		Matrix mean = new Matrix(W.getColumnDimension(),W.getRowDimension());
+		
+		Matrix mean = new Matrix(W.getRowDimension(),W.getColumnDimension());
+		//System.out.println("Mean column is " + W.getColumnDimension());
 		int n = W.getColumnDimension() / func.Fonctions.numberClasses;
 		
-		for(int col = 0; col < W.getColumnDimension(); col++)
-		{
-			// For every chunk of 40 elements get the same class element within each
-			double totalClass = 0;
-			for(int groupIndex = col%n; groupIndex < W.getColumnDimension(); groupIndex += func.Fonctions.numberClasses)
-			{
-				totalClass += func.Fonctions.mean(W, groupIndex);
-			}
-			for(int row = 0; row < W.getRowDimension(); row++)
-			{
-				mean.set(col,row,n*(W.get(row, col)-totalClass/n));
-			}
-		}
 		
-		return mean.transpose().times(mean);
+
+		for(int row = 0; row < W.getRowDimension(); row++)
+		{
+			double rowTotal = 0;
+			double totalClass[] = new double[func.Fonctions.numberClasses];
+			for(int col = 0; col < W.getColumnDimension(); col++)
+			{
+				rowTotal += W.get(row,col);
+				totalClass[col%(func.Fonctions.numberClasses)] += W.get(row,col);
+			}
+			rowTotal = rowTotal/n;
+
+			for(int col = 0; col < W.getColumnDimension(); col++)
+			{
+				if(col < totalClass.length)
+				{
+					totalClass[col] /= n;
+				}
+				mean.set(row,col,n*(W.get(row, col)-totalClass[col%(func.Fonctions.numberClasses)]));
+					
+			}
+			
+		}
+		return mean.times(mean.transpose());
 	}
 	
 	public static Matrix BetweenScatterMatrix(Matrix W)
 	{
-		Matrix mean = new Matrix(W.getColumnDimension(),1);
+		Matrix mean = new Matrix(W.getRowDimension(),W.getColumnDimension());
+		//System.out.println("Mean column is " + W.getColumnDimension());
 		int n = W.getColumnDimension() / func.Fonctions.numberClasses;
 		
-		for(int col = 0; col < W.getColumnDimension(); col++)
-		{
-			// For every chunk of 40 elements get the same class element within each
-			double totalClass = 0;
-			for(int groupIndex = col%n; groupIndex < W.getColumnDimension(); groupIndex += func.Fonctions.numberClasses)
-			{
-				totalClass += func.Fonctions.mean(W, groupIndex);
-			}
-			mean.set(col,0,n*(totalClass/n-func.Fonctions.meanTotal(W)));
-		}
 		
-		return mean.transpose().times(mean);
+			// For every chunk of 40 elements get the same class element within each
+		for(int row = 0; row < W.getRowDimension(); row++)
+		{
+			double rowTotal = 0;
+			double totalClass[] = new double[func.Fonctions.numberClasses];
+			for(int col = 0; col < W.getColumnDimension(); col++)
+			{
+				rowTotal += W.get(row,col);
+				totalClass[col%(func.Fonctions.numberClasses)] += W.get(row,col);
+			}
+			rowTotal = rowTotal/n;
+
+			for(int col = 0; col < W.getColumnDimension(); col++)
+			{
+				if(col < totalClass.length)
+				{
+					totalClass[col] /= n;
+				}
+				mean.set(row,col,(totalClass[col%(func.Fonctions.numberClasses)]-rowTotal));
+			}
+			
+		}
+		return mean.times(mean.transpose());
 	}
 	
 	public static Matrix WPCA(Matrix W)
 	{
-		
-		/*Matrix wpca = new Matrix(0, W.getRowDimension());
-		
-		for(int row = 0; row < W.getRowDimension(); row++)
-		{
-			System.out.println(W.getMatrix(0, 0, 0 , W.getColumnDimension()-1).times(ScatterMatrix(W).times(W.getMatrix(0, 0,0 , W.getColumnDimension()-1).transpose())).det());
-		}*/
-		
-		//Matrix wpca = W.times(ScatterMatrix(W).times(W.transpose()));
-		//System.out.println("Rows " + wpca.getRowDimension() + " Cols " + wpca.getColumnDimension());
-		//int col = func.Fonctions.getMaxDet(wpca);
-		double det=-9999;
-		Matrix bestClass = null;
-		for(int count = 0; count < func.Fonctions.numberClasses;count++)
-		{
-			Matrix oneClass = GetClass(count, W);
-			Matrix wpca = oneClass.times(scatterEntrainer[count].times(oneClass.transpose()));
-			double currentDet = wpca.det();
-			det = (currentDet > det) ? currentDet : det;
-			bestClass = (currentDet > det) ? wpca : bestClass;
-		}
-		System.out.println("Le meilleur det est : " + det);	
-		return bestClass;
+		System.out.println("Scatter : " + ScatterMatrix(W).getRowDimension()+ "  "+ScatterMatrix(W).getColumnDimension());
+		System.out.println("W : " + W.getRowDimension()+ "  "+W.getColumnDimension());
+		return W.times(ScatterMatrix(W)).times(W.transpose());
+
 	}
 	
+	public static Matrix WFLD(Matrix W)
+	{
+		Matrix wpca = WPCA(W);
+		//wpca.print(2, 5);
+		//System.out.println("WPCA : " + wpca.getRowDimension()+ "  "+wpca.getColumnDimension());
+		System.out.println("BetweenScatterMatrix : " + BetweenScatterMatrix(W).getRowDimension()+ "  "+BetweenScatterMatrix(W).getColumnDimension());
+		System.out.println("WithinScatterMatrix : " + WithinScatterMatrix(W).getRowDimension()+ "  "+WithinScatterMatrix(W).getColumnDimension());
+		//System.out.println("W : " + W.getRowDimension()+ "  "+W.getColumnDimension());
+		//System.out.println("W.times(wpca): " + W.times(wpca).getRowDimension() + "  "+W.times(wpca).getColumnDimension());
+		
+		Matrix num = W.transpose()
+				.times(wpca.transpose())
+				.times(BetweenScatterMatrix(W))
+				.times(wpca)
+				.times(W);
+		Matrix denum = W.transpose()
+				.times(wpca.transpose())
+				.times(WithinScatterMatrix(W))
+				.times(wpca)
+				.times(W);
+		System.out.println("Num : " + num.getRowDimension() + "   " + num.getColumnDimension());
+		System.out.println("Denum : " + denum.getRowDimension() + "   " + denum.getColumnDimension());
+		return denum.transpose().times(num);
+
+	}
+	
+	public static Matrix WOPT(Matrix W, boolean entrainement)
+	{
+		// Method 1
+		//Matrix wopt = W.times(BetweenScatterMatrix(W).times(W.transpose()));
+		//int col = func.Fonctions.getMaxDet(W);
+		//return wopt.getMatrix(0, wopt.getRowDimension()-1, col, col);
+		// If it is training, generate the scatter matrices
+		// Method 2
+		System.out.println("WCPA T : " + WPCA(W).transpose().getRowDimension() + "  " + WPCA(W).transpose().getColumnDimension());
+		System.out.println("WFLD T : " + WFLD(W).transpose().getRowDimension() + "  " + WFLD(W).transpose().getColumnDimension());
+		return WPCA(W).transpose().times(WFLD(W).transpose()).transpose();
+	}
+	
+	/*
 	private static Matrix GetClass(int i, Matrix w) {
 		int maxShifts = w.getColumnDimension()/func.Fonctions.numberClasses;
 		Matrix newMatrix = new Matrix(w.getRowDimension(),maxShifts);
@@ -101,48 +144,5 @@ public class Fisherfaces {
 		}
 		return newMatrix;
 	}
-
-	public static Matrix WFLD(Matrix W)
-	{
-		Matrix wpca = WPCA(W);
-		
-		double det=-9999;
-		Matrix bestClass = null;
-		for(int count = 0; count < func.Fonctions.numberClasses;count++)
-		{
-			Matrix oneClass = GetClass(count, W);
-			Matrix num = oneClass.times(wpca.times(betweenScatterEntrainer.times(wpca.transpose().times(oneClass.transpose()))));
-			Matrix denum = oneClass.times(wpca.times(withinScatterEntrainer.times(wpca.transpose().times(oneClass.transpose()))));
-			
-			Matrix wfld = num.times(denum.transpose());
-			double currentDet = wfld.det();
-			det = (currentDet > det) ? currentDet : det;
-			bestClass = (currentDet > det) ? wfld : bestClass;
-		}
-		System.out.println("Le meilleur det est : " + det);
-		return bestClass;
-	}
-	
-	public static Matrix WOPT(Matrix W, boolean entrainement)
-	{
-		// Method 1
-		//Matrix wopt = W.times(BetweenScatterMatrix(W).times(W.transpose()));
-		//int col = func.Fonctions.getMaxDet(W);
-		//return wopt.getMatrix(0, wopt.getRowDimension()-1, col, col);
-		// If it is training, generate the scatter matrices
-		if(entrainement)
-		{
-			for(int count = 0; count < func.Fonctions.numberClasses; count++)
-			{
-				scatterEntrainer[count] = ScatterMatrix(GetClass(count,W));
-			}
-			
-			betweenScatterEntrainer = BetweenScatterMatrix(W);
-			withinScatterEntrainer = WithinScatterMatrix(W);
-		}
-		// Method 2
-		return WPCA(W).transpose().times(WFLD(W).transpose()).transpose();
-	}
-	
-	
+   */
 }

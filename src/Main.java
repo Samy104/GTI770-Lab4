@@ -20,7 +20,8 @@ public class Main {
 	 * 
 	 */
 	
-	private static Matrix wopt;
+	private static Matrix woptEntraine;
+	private static PCA pcaEntraine;
 	
 	public static void main(String[] args) {
 		Matrix preparedMatrix = null;
@@ -90,7 +91,7 @@ public class Main {
 			EntrainerModele(func.Fonctions.aggregateExceptOne(matrixArray, k));
 			System.out.println("Fin de l'entrainement");
 			System.out.println("Debut du test");
-			//EvaluerModele(matrixArray.get(k));
+			EvaluerModele(matrixArray.get(k));
 			System.out.println("Fin du test");
 		}
 	}
@@ -99,23 +100,29 @@ public class Main {
 	{
 		System.out.println(ent.getRowDimension() + "  :   " + ent.getColumnDimension());
 		// With the given matrix to train calculate the new PCA
-		PCA toTrain = new PCA(ent);
-		toTrain.Calculate();
-		Matrix toTrainProjected = toTrain.getProjectedMatrix();
+		pcaEntraine = new PCA(ent);
+		pcaEntraine.Calculate();
+		Matrix toTrainProjected = pcaEntraine.getProjectedMatrix();
 		func.Fonctions.printMatrix(toTrainProjected,"Output/reduite.txt");
-		toTrainProjected.print(2, 2);
+		//toTrainProjected.print(2, 2);
 		// Having the new PCA get the Fisher
 		// We need to store the return to a variable for EvaluerModele
-		wopt = func.Fisherfaces.WOPT(toTrainProjected, true);
-		System.out.println("WOPT rows: " + wopt.getRowDimension() + " cols: " + wopt.getColumnDimension());
+		woptEntraine = func.Fisherfaces.WOPT(toTrainProjected, true);
+		System.out.println("WOPT rows: " + woptEntraine.getRowDimension() + " cols: " + woptEntraine.getColumnDimension());
 	}
 	
 	public static void EvaluerModele(Matrix ev)
 	{
 		// Reduce the dimensions to fit with the old
-		PCA toTest = new PCA(ev);
-		toTest.Calculate();
-		Matrix toTestProjected = toTest.getProjectedMatrix();
+		for(int col = 0; col < ev.getColumnDimension(); col++)
+		{
+			Matrix currentImageCentre = func.Fonctions.CalculateCenteredMatrix(ev.getMatrix(0, ev.getRowDimension(), col, col));
+			Matrix vecteurPoids = woptEntraine.times(pcaEntraine.getPrincipauxVecteurs().times(currentImageCentre));
+			vecteurPoids.print(2, 2);
+			
+		}
+		
+		
 		
 	}
 }

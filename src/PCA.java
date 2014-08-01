@@ -32,9 +32,10 @@ public class PCA {
 	{
 		
 		this.xBar = func.Fonctions.CalculateCenteredMatrix(xMatrix);
+		//this.xBar.print(2, 2);
 		/*this.matriceDeCovariance = xBar;
 		*/
-		this.matriceDeCovariance = xMatrix.times(xMatrix.transpose());
+		//this.matriceDeCovariance = xBar.times(xBar.transpose());
 		/*Matrix D = matriceDeCovariance.eig().getD();
 		Matrix VecteursV = xMatrix.times(D);*/
 		
@@ -42,8 +43,8 @@ public class PCA {
 		//Matrix V = xMatrix.svd().getV();
 		//Matrix U = xMatrix.svd().getU();
 		
-		Matrix V2 = vecteurPropre(xMatrix);
-		func.Fonctions.printMatrix(V2, "Output/XbarCentered.txt");
+		//Matrix V2 = vecteurPropre(xMatrix);
+		//func.Fonctions.printMatrix(V2, "Output/XbarCentered.txt");
 		
 		//func.Fonctions.printMatrix(S, "Output/S.txt");
 		//func.Fonctions.printMatrix(V, "Output/V.txt");
@@ -55,7 +56,7 @@ public class PCA {
 		//swapped.print(2, 6);
 		calculatePrincipauxVec(swapped,xMatrix);
 		
-		func.Fonctions.printMatrix(xMatrix.times(swapped),"Output/Testing.txt");
+		//func.Fonctions.printMatrix(xMatrix.times(swapped),"Output/Testing.txt");
 		
 		
 		Matrix Wk = principauxVecteurs.times(getXbar().transpose());
@@ -92,13 +93,16 @@ public class PCA {
 		// TODO Auto-generated method stub
 		
 		Matrix vecTot = new Matrix(i,propre.getColumnDimension());
-		
+		//System.out.println("Total matrix propre = " + propre.getColumnDimension()+ "  " + propre.getRowDimension());
 		for(int currentPixel = 0; currentPixel < i; currentPixel++)
 		{
 			// Track current i from OrderedMatrices then get position it is at now and add it to the Matrix
-			int currentPrincipaux = OrderedMatrices[i][1].intValue()-1;
+			int currentPrincipaux = OrderedMatrices[currentPixel][1].intValue();
 			
-			vecTot.setMatrix(currentPixel, currentPixel, 0, propre.getColumnDimension()-1, propre.getMatrix(OrderedMatrices[currentPrincipaux][1].intValue()-1, OrderedMatrices[currentPrincipaux][1].intValue()-1, 0, propre.getColumnDimension()-1));
+			//sSystem.out.println("Current Principal val : "+ OrderedMatrices[currentPixel][1]);
+			vecTot.setMatrix(currentPixel, currentPixel, 0, propre.getColumnDimension()-1, 
+					propre.getMatrix((int)OrderedMatrices[currentPrincipaux][1].intValue(), (int)OrderedMatrices[currentPrincipaux][1].intValue(), 
+									0, propre.getColumnDimension()-1));
 		}
 		
 		return vecTot;
@@ -120,6 +124,11 @@ public class PCA {
 		return this.xBar;
 	}
 	
+	public Matrix getPrincipauxVecteurs()
+	{
+		return this.principauxVecteurs;
+	}
+	
 	public Matrix getXbarTranspose(){
 		return this.xBar.transpose();
 	}
@@ -133,8 +142,10 @@ public class PCA {
 		
 		for(int i = 0; i < start.getRowDimension(); i++)
 		{
+			
 			OrderedMatrices[i][0] = Math.abs(start.get(i,i));
 			OrderedMatrices[i][1] = (double) i;
+			//System.out.println(OrderedMatrices[i][0] + OrderedMatrices[i][1]);
 		}
 		Arrays.sort(OrderedMatrices, 
 				new Comparator<Double[]>() {
@@ -168,7 +179,7 @@ public class PCA {
 			denum += from.get(i, i);
 		}
 		//System.out.println("Pourcentage de alpha: " + (num/denum));
-		decision = (num/denum >= 0.9) ? true : false;
+		decision = (num/denum >= 0.98) ? true : false;
 		
 		return decision;
 	}
@@ -188,88 +199,7 @@ public class PCA {
 		return t;
 	}
 	
-	public void printToFile(String path)
-	{
-		PrintWriter write = null;
-		
-		try
-		{
-			write = new PrintWriter(path, "UTF-8");
-			
-			write.append("XBAR CENTREE");
-			for(int i = 0; i < xBar.getRowDimension(); i++){
-				write.println();
-				for(int j = 0; j<xBar.getColumnDimension(); j++){
-					write.print(xBar.get(i, j) + " ");
-				}
-			}
-			
-			Matrix swapped = getSwappedDIAGMatrix(diagonal(matriceDeCovariance));
-			
-			calculatePrincipauxVec(swapped,matriceDeCovariance);
-			
-			
-			write.append("matrice de cov");
-			//Matrice de cov
-			for(int i = 0; i < matriceDeCovariance.getRowDimension(); i++){
-				write.println();
-				for(int j = 0; j<matriceDeCovariance.getColumnDimension(); j++){
-					write.print(matriceDeCovariance.get(i, j) + " ");
-				}
-			}
-			
-			//Vecteur Propre
-			
-			for(int i = 0; i < vecteurPropre(matriceDeCovariance).getRowDimension(); i++){
-				write.println();
-				for(int j = 0; j < vecteurPropre(matriceDeCovariance).getColumnDimension(); j++){
-					write.print(vecteurPropre(matriceDeCovariance).get(i, j) + " ");
-				}
-			}
-			
-			//VP Transpose
-			
-			for(int i = 0; i < vecPTranspose(matriceDeCovariance).getRowDimension(); i++){
-				write.println();
-				for(int j = 0; j<vecPTranspose(matriceDeCovariance).getColumnDimension(); j++){
-					write.print(vecPTranspose(matriceDeCovariance).get(i, j) + " ");
-				}
-			}
-			
-			//Diagonal
-			
-			for(int i = 0; i < diagonal(matriceDeCovariance).getRowDimension(); i++){
-				write.println();
-				for(int j = 0; j<diagonal(matriceDeCovariance).getColumnDimension(); j++){
-					write.print(diagonal(matriceDeCovariance).get(i, j) + " ");
-				}
-			}
-			
-			//Z
-			
-			for(int i = 0; i < getXbar().times(principauxVecteurs).getRowDimension(); i++){
-				write.println();
-				for(int j = 0; j<getXbar().times(principauxVecteurs).getColumnDimension(); j++){
-					write.print(getXbar().times(principauxVecteurs).get(i, j) + " ");
-				}
-			}
-			
-			// Do the shit for task 1-5: Projeter dans le sous espace de K Z= Xmoyenne*Vk
-			
-			//System.out.println("Matrice Z Projete");
-			
-			Z = getXbar().times(principauxVecteurs);
-			
-			
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}finally{
-			write.close();
-		}
-		
-	}
+	
 	
 	public Matrix getProjectedMatrix(){
 		return this.Z;
