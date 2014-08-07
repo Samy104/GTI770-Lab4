@@ -116,8 +116,14 @@ public class Main {
 		// Reduce the dimensions to fit with the old
 		for(int col = 0; col < ev.getColumnDimension(); col++)
 		{
-			Matrix currentImageCentre = func.Fonctions.CalculateCenteredMatrix(ev.getMatrix(0, ev.getRowDimension(), col, col));
-			Matrix vecteurPoids = woptEntraine.times(pcaEntraine.getPrincipauxVecteurs().times(currentImageCentre));
+			Matrix currentImageCentre = func.Fonctions.CalculateCenteredMatrix(ev.getMatrix(0, ev.getRowDimension()-1, col, col));
+			System.out.println("W:" + woptEntraine.getRowDimension() + "  " + woptEntraine.getColumnDimension());
+			System.out.println("PCA:" + pcaEntraine.getPrincipauxVecteurs().getRowDimension() + "  " + pcaEntraine.getPrincipauxVecteurs().getColumnDimension());
+			System.out.println("Xbar:" + currentImageCentre.getRowDimension() + "  " + currentImageCentre.getColumnDimension());
+			Matrix vecteurPoids = woptEntraine
+					.times(pcaEntraine.getPrincipauxVecteurs()
+					.times(currentImageCentre
+							));
 			vecteurPoids.print(2, 2);
 			
 		}

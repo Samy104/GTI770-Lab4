@@ -49,7 +49,7 @@ public class Fisherfaces {
 			}
 			
 		}
-		return mean.times(mean.transpose());
+		return mean.transpose().times(mean);
 	}
 	
 	public static Matrix BetweenScatterMatrix(Matrix W)
@@ -81,7 +81,7 @@ public class Fisherfaces {
 			}
 			
 		}
-		return mean.times(mean.transpose());
+		return mean.transpose().times(mean);
 	}
 	
 	public static Matrix WPCA(Matrix W)
@@ -126,9 +126,11 @@ public class Fisherfaces {
 		//return wopt.getMatrix(0, wopt.getRowDimension()-1, col, col);
 		// If it is training, generate the scatter matrices
 		// Method 2
-		System.out.println("WCPA T : " + WPCA(W).transpose().getRowDimension() + "  " + WPCA(W).transpose().getColumnDimension());
-		System.out.println("WFLD T : " + WFLD(W).transpose().getRowDimension() + "  " + WFLD(W).transpose().getColumnDimension());
-		return WPCA(W).transpose().times(WFLD(W).transpose()).transpose();
+		//System.out.println("WCPA T : " + WPCA(W).transpose().getRowDimension() + "  " + WPCA(W).transpose().getColumnDimension());
+		//System.out.println("WFLD T : " + WFLD(W).transpose().getRowDimension() + "  " + WFLD(W).transpose().getColumnDimension());
+		//return WPCA(W).transpose().times(WFLD(W).transpose()).transpose();
+		return (W.times(BetweenScatterMatrix(W)).times(W.transpose()))
+				.times(W.times(WithinScatterMatrix(W)).times(W.transpose()).transpose());
 	}
 	
 	/*
