@@ -5,7 +5,6 @@ import Jama.Matrix;
 /**
  * @author Christopher Larivière, Samy Lemcelli
  * Cette classe contient seulement les fonctions de Fisherfaces.
- * 
  */
 public class Fisherfaces {
 	

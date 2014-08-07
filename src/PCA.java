@@ -38,7 +38,7 @@ public class PCA {
 	 * La calcule.
 	 */
 	
-	public void Calculate()
+	public void calculate()
 	{
 		
 		this.xBar = func.Fonctions.CalculateCenteredMatrix(xMatrix);

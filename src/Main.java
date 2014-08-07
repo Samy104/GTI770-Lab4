@@ -57,8 +57,6 @@ public class Main {
 			matrixArray.add(k,func.Fonctions.AppendRecursively(preparedMatrix, k, 40));
 		}
 		
-		double mean = 0;
-		double variance = 0;
 		long start=0;
 		for(int k = 0; k < 10 ; k++)
 		{
@@ -81,7 +79,7 @@ public class Main {
 	public static void EntrainerModele(Matrix ent)
 	{
 		pcaEntraine = new PCA(ent);
-		pcaEntraine.Calculate();
+		pcaEntraine.calculate();
 		Matrix toTrainProjected = pcaEntraine.getProjectedMatrix();
 		woptEntraine = func.Fisherfaces.WOPT(toTrainProjected);
 	}

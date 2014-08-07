@@ -1,16 +1,14 @@
+
+ #Ce code appartient a été par bytefish.
+ #Il a été utilisé pour l'éducation et non pour des besoins monétaires, et seulement pour récupérer les pixels des images que notre application pourrait pas éffectué!
+ #
+ #Il a été modifié par Christopher Larivière 24 juillet 2014
+ #Nous ne connaissons pas beaucoup de octave alors nous avons chercher pour des sources qui on fait exactement ce que nous voulions.
+ #Code originale peut être retrouver ici: https://github.com/bytefish/facerec/blob/master/m/util/read_images.m 
+
+
 function [X y width height names] = read_images(path)
-	%% Read images from a given path and return the Imagematrix X.
-	%%
-	%% Returns:
-	%%  X [numDim x numSamples] Array with images given in columns -- [X1,X2,...,Xn]
-	%%  y [1 x numSamples] Classes corresponding to images of X. -- [y1,y2,...,yn]
-	%%  width [int] width of the images
-	%%  height [int] height of the images
-	%%  names [cell array] folder name of each class, so names{1} is the name of class 1
-	%%
-	%% Example:
-	%% 	[X y width height names] = read_images("./data/yalefaces")
-	%%
+	
 	folder = list_files(path);
 	X = [];
 	y = [];
@@ -22,27 +20,25 @@ function [X y width height names] = read_images(path)
 		subject = folder{i};
 		images = list_files([path, filesep, subject]);
 		if(length(images) == 0)
-			continue; %% dismiss files or empty folder
+			continue;
 		end
    
 		added = 0;
 		names{n} = subject;
-		%% build image matrix and class vector
+
 		for j=1:length(images)
-			%% absolute path
 			filename = [path, filesep, subject, filesep, images{j}]; 
 			
-			directoryyy = ["..\\..\\Octave-Matrices",filesep,subject];
-			newFile = ["..\\..\\Octave-Matrices",filesep,subject,filesep,strsplit(images{j}, "."){1,1}];
-			mkdir(directoryyy);
-			newFile = strcat(newFile, ".txt");
-			%% Octave crashes on reading non image files (uncomment this to be a bit more robust)
+			directoryyy = ["..\\..\\Octave-Matrices",filesep,subject]; # Cette ligne a été changé pour accomoder notre utilisation de l'application fisherfaces.
+			newFile = ["..\\..\\Octave-Matrices",filesep,subject,filesep,strsplit(images{j}, "."){1,1}]; # Cette ligne a été changé pour accomoder notre utilisation de l'application fisherfaces.
+			mkdir(directoryyy); # Cette ligne a été changé pour accomoder notre utilisation de l'application fisherfaces.
+			newFile = strcat(newFile, ".txt"); # Cette ligne a été changé pour accomoder notre utilisation de l'application fisherfaces.
+
 			extension = strsplit(images{j}, "."){end};
 			if(~any(strcmpi(extension, {"bmp", "gif", "jpg", "jpeg", "png", "tiff"})))
 				continue;
 			endif
       
-			% Quite a pythonic way to handle failure.... May blow you up just like the above.
 			try
 				T = double(imread(filename));
 			catch
@@ -52,15 +48,13 @@ function [X y width height names] = read_images(path)
 
 			[height width channels] = size(T);
       
-			% greyscale the image if we have 3 channels
 			if(channels == 3)
 				T = (T(:,:,1) + T(:,:,2) + T(:,:,3)) / 3;
 			end
       
-			%% finally try to append data
 			try
-				%% Add image as a column vector:
-				X = [reshape(T,width*height,1)];
+
+				X = [reshape(T,width*height,1)]; # Cette ligne a été changé pour accomoder notre utilisation de l'application fisherfaces.
 				y = [n];
 				added = added + 1;
 			catch
@@ -72,7 +66,6 @@ function [X y width height names] = read_images(path)
 			fclose(fid);
 			
 		end
-		% only increment class if images were actually added!
 		if ~(added == 0)
 			n = n + 1;
 		end
@@ -80,16 +73,6 @@ function [X y width height names] = read_images(path)
 end
 
 function L = list_files(path)
-	%% List all files in a folder and return it as a cell array.
-	%%
-	%% Args:
-	%%  path: Path to list files from.
-	%%
-	%% Returns:
-	%%  L: Cell array with files in this folder.
-	%%
-	%% Example:
-	%% 	L = list_files("./data/yalefaces")
 	L = dir(path);
 	L = L(3:length(L));
 	L = struct2cell(L);
