@@ -1,13 +1,12 @@
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 
-import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
-import Jama.SingularValueDecomposition;
+
+/**
+ * @author Samy Lemcelli, Christopher Larivière
+ * La classe PCA qui nous calcule notre PCA.
+ */
 
 public class PCA {
 
@@ -23,50 +22,40 @@ public class PCA {
 	Double[][] OrderedMatrices;
 	
 
+	/**
+	 * Constructeur principale de notre classe
+	 * @param la Matrice utilisée par la classe
+	 */
+	
 	public PCA (Matrix main)
 	{
 		this.xMatrix = main;
 	}
 	
+	/**
+	 * Exécute la tâche principal du PCA.
+	 * La calcule.
+	 */
+	
 	public void Calculate()
 	{
 		
 		this.xBar = func.Fonctions.CalculateCenteredMatrix(xMatrix);
-		//this.xBar.print(2, 2);
-		/*this.matriceDeCovariance = xBar;
-		*/
-		//this.matriceDeCovariance = xBar.times(xBar.transpose());
-		/*Matrix D = matriceDeCovariance.eig().getD();
-		Matrix VecteursV = xMatrix.times(D);*/
 		
-		//Matrix S = xMatrix.svd().getS();
-		//Matrix V = xMatrix.svd().getV();
-		//Matrix U = xMatrix.svd().getU();
-		
-		//Matrix V2 = vecteurPropre(xMatrix);
-		//func.Fonctions.printMatrix(V2, "Output/XbarCentered.txt");
-		
-		//func.Fonctions.printMatrix(S, "Output/S.txt");
-		//func.Fonctions.printMatrix(V, "Output/V.txt");
-		//func.Fonctions.printMatrix(U, "Output/U.txt");
-		
-		
-		//Matrix vecteurPropre = xMatrix.times(vecteurPropre(xMatrix));
 		Matrix swapped = getSwappedDIAGMatrix(diagonal(xMatrix));
-		//swapped.print(2, 6);
 		calculatePrincipauxVec(swapped,xMatrix);
-		
-		//func.Fonctions.printMatrix(xMatrix.times(swapped),"Output/Testing.txt");
-		
 		
 		Matrix Wk = principauxVecteurs.times(getXbar().transpose());
 		this.Z = Wk.times(getXbar());
 		System.out.println(this.Z.getRowDimension() + " " +this.Z.getColumnDimension());
-		//Matrix W = matriceDeCovariance.times(vecteurPropre);
-		//func.Fonctions.printMatrix(W, "Output/WMatrix.txt");
-		//printToFile("Output/datMatrix.txt");
 		
 	}
+	
+	/**
+	 * Calcule les K principaux vecteurs avec un alpha qui représente 0.98 ou 98 % (pourcent) des données
+	 * @param La matrice à calculer les vecteurs propres
+	 * @param matriceDeCov
+	 */
 	
 	public void calculatePrincipauxVec(Matrix swap,Matrix matriceDeCov){
 		int i = 0;
@@ -76,30 +65,26 @@ public class PCA {
 		}
 		i++;
 		
-		
 		System.out.println("Number of principaux vectors is " + i);
 		Matrix vecProp = vecteurPropre(matriceDeCov);
-		// principauxVecteurs = vecProp.getMatrix(0, vecProp.getRowDimension()-1, vecProp.getColumnDimension()-1-i, vecProp.getColumnDimension()-1);
 		principauxVecteurs = getFirstIPrincVec(vecProp, i);
-	
-	//System.out.println("Vecteurs propres choisi: ");
-	//principauxVecteurs.print(i, 8);
-		
 	}
-	
-
+		
+	/**
+	 * Calcule la première vecteur propre du PCA
+	 * @param Matrice x
+	 * @param nombre de rangée nécessaire dans matrice
+	 * @return une matrice de Principaux Vecteurs
+	 */
 	
 	private Matrix getFirstIPrincVec(Matrix propre, int i) {
-		// TODO Auto-generated method stub
-		
 		Matrix vecTot = new Matrix(i,propre.getColumnDimension());
-		//System.out.println("Total matrix propre = " + propre.getColumnDimension()+ "  " + propre.getRowDimension());
+
 		for(int currentPixel = 0; currentPixel < i; currentPixel++)
 		{
-			// Track current i from OrderedMatrices then get position it is at now and add it to the Matrix
+			// Prend la 'i' courante et récupère cette position du tableau Ordered Matrices et ajoute la à la matrice.
 			int currentPrincipaux = OrderedMatrices[currentPixel][1].intValue();
 			
-			//sSystem.out.println("Current Principal val : "+ OrderedMatrices[currentPixel][1]);
 			vecTot.setMatrix(currentPixel, currentPixel, 0, propre.getColumnDimension()-1, 
 					propre.getMatrix((int)OrderedMatrices[currentPrincipaux][1].intValue(), (int)OrderedMatrices[currentPrincipaux][1].intValue(), 
 									0, propre.getColumnDimension()-1));
@@ -108,44 +93,83 @@ public class PCA {
 		return vecTot;
 	}
 
-	public Matrix vecteurPropre(Matrix matriceDeCovariance){		
-		return matriceDeCovariance.eig().getV();	
+	/**
+	 * Retourne la matrice des vecteurs propres de la matrice passée en paramètre
+	 * @param matrice x
+	 * @return matrice des vecteurs propres 
+	 */
+	
+	public Matrix vecteurPropre(Matrix x){		
+		return x.eig().getV();	
 	}
 	
-	public Matrix diagonal(Matrix matriceDeCovariance){
-		return matriceDeCovariance.eig().getD();
+	/**
+	 * Retourne la matrice diagonal de la matrice passée en paramètre
+	 * @param matrice x
+	 * @return la diagonal de la matrice passée en paramètre
+	 */
+	
+	public Matrix diagonal(Matrix x){
+		return x.eig().getD();
 	}
 	
-	public Matrix vecPTranspose(Matrix matriceDeCovariance){
-		return vecteurPropre(matriceDeCovariance).transpose();
+	/**
+	 * Retourne la matrice des vecteurs propres transposée de la matrice passée en paramètre
+	 * @param matrice x 
+	 * @return Matrice des vecteurs propres transposée
+	 */
+	
+	public Matrix vecPTranspose(Matrix x){
+		return vecteurPropre(x).transpose();
 	}
 	
+	/**
+	 * Retourne xBar (déjà calculée)
+	 * N.B: il ne sera pas recalculer, sinon, la matrice retournera null
+	 * @return matrice xbar
+	 */
 	public Matrix getXbar(){
 		return this.xBar;
 	}
+	
+	/**
+	 * La matrice des principaux vecteurs (déjà calculer)
+	 * N.B: la matrice doit être calculer, sinon, la matrice retournera null.
+	 * @return
+	 */
 	
 	public Matrix getPrincipauxVecteurs()
 	{
 		return this.principauxVecteurs;
 	}
 	
+	/**
+	 * Retourne la matrice xbar transposée 
+	 * @return matrice xbar transposée
+	 * N.B: la matrice doit être calculer, sinon, la matrice retournera null.
+	 */
+	
 	public Matrix getXbarTranspose(){
 		return this.xBar.transpose();
 	}
 	
+	/**
+	 * Mets les diagonal en ordre décroissant.
+	 * @param la matrice à replacer en ordre
+	 * @return
+	 */
 	
-	public Matrix getSwappedDIAGMatrix(Matrix start)
+	public Matrix getSwappedDIAGMatrix(Matrix x)
 	{
-		Matrix exit = new Matrix(start.getRowDimension(),start.getColumnDimension());
+		Matrix exit = new Matrix(x.getRowDimension(),x.getColumnDimension());
 		
-		OrderedMatrices = new Double[start.getRowDimension()][2];
+		OrderedMatrices = new Double[x.getRowDimension()][2];
 		
-		for(int i = 0; i < start.getRowDimension(); i++)
+		for(int i = 0; i < x.getRowDimension(); i++)
 		{
 			
-			OrderedMatrices[i][0] = Math.abs(start.get(i,i));
+			OrderedMatrices[i][0] = Math.abs(x.get(i,i));
 			OrderedMatrices[i][1] = (double) i;
-			//System.out.println(OrderedMatrices[i][0] + OrderedMatrices[i][1]);
 		}
 		Arrays.sort(OrderedMatrices, 
 				new Comparator<Double[]>() {
@@ -155,13 +179,20 @@ public class PCA {
 			        }
 			    });
 		
-		for(int i = 0; i < start.getRowDimension(); i++)
+		for(int i = 0; i < x.getRowDimension(); i++)
 		{
 			exit.set(i, i, OrderedMatrices[i][0]);
 		}
 		
 		return exit;
 	}
+	
+	/**
+	 * Calcule les principaux vecteurs de la matrice passée en paramètre
+	 * @param constante k
+	 * @param matrice x
+	 * @return vrai si cela a fonctionné, faux sinon.
+	 */
 	
 	public boolean getKPrincipauxVecteurs(int k, Matrix from)
 	{
@@ -178,28 +209,16 @@ public class PCA {
 			}
 			denum += from.get(i, i);
 		}
-		//System.out.println("Pourcentage de alpha: " + (num/denum));
 		decision = (num/denum >= 0.98) ? true : false;
 		
 		return decision;
 	}
 	
-	public Matrix getSwapMatrix(Matrix swapping){
-		Matrix t = new Matrix(swapping.getRowDimension(),swapping.getColumnDimension());
-		
-		int indexJ = 0;
-		
-		for (int j = swapping.getColumnDimension()-1; j >= 0;j--){	
-			for(int i = 0; i < swapping.getRowDimension();i++){
-				t.set(i, indexJ,
-						swapping.get(i,j));
-			}
-			indexJ++;
-		}
-		return t;
-	}
-	
-	
+	/**
+	 * Retourne la matrice projetée Z  calculer auparavant.
+	 * @return matrice projetée Z
+	 * N.B: la matrice doit être calculer, sinon, la matrice retournera null.
+	 */
 	
 	public Matrix getProjectedMatrix(){
 		return this.Z;

@@ -1,27 +1,28 @@
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
-
-import javax.imageio.ImageIO;
 
 import Jama.Matrix;
 
 
+/**
+ * @author Christopher Larivière, Samy Lemcelli
+ * 
+ * On doit prendre les images, les transformer et les inserrer dans une matrice
+ * En harmonie, on doit créer une matrice R contenant les classes de chacune des donnes
+ * On devra séparer notre matrice en 10(K) blocs de 40(Classes) et entrainer/évaluer en utilisant ces matrices.
+ * On pourra par la suite imprimer les erreurs, etc.	 * 
+ */
+
 public class Main {
-	
-	/*
-	 * On doit prendre les images, les transformer et les inserrer dans une matrice
-	 * En harmonie, on doit créer une matrice R contenant les classes de chacune des donnes
-	 * On devra séparer notre matrice en 10(K) blocs de 40(Classes) et entrainer/évaluer en utilisant ces matrices.
-	 * On pourra par la suite imprimer les erreurs, etc.
-	 * 
-	 */
-	
+		
 	private static Matrix woptEntraine;
 	private static PCA pcaEntraine;
+	
+	/**
+	 * Prépare la matrice et l'envoi directement à notre validation.
+	 * Le point d'entrée de notre programme
+	 */
 	
 	public static void main(String[] args) {
 		Matrix preparedMatrix = null;
@@ -31,62 +32,32 @@ public class Main {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		
-			
-		//System.out.println("Rows: "+preparedMatrix.getRowDimension()+" Columns: " + preparedMatrix.getColumnDimension());
-		
-		//Print Matrix out to a file
-		
-		/*PrintWriter printer = null;
-		try{
-			printer = new PrintWriter("Output/fileTest.txt");
-			for(int i = 0; i<preparedMatrix.getRowDimension(); i++){
-				printer.println();
-				for(int j = 0; j<preparedMatrix.getColumnDimension(); j++){
-					printer.print(preparedMatrix.get(i, j) + " ");
-				}
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		
-		Matrix xBar = func.Fonctions.CalculateCenteredMatrix(preparedMatrix);
-		func.Fonctions.printMatrix(xBar,"Output/averagesImages.txt");
-		
-		PCA pcaTest = new PCA(xBar);
-		pcaTest.Calculate();
-		*/
-		//Matrix wBet = func.Fisherfaces.BetweenScatterMatrix(preparedMatrix);
-		//Matrix wOut = func.Fisherfaces.WithinScatterMatrix(preparedMatrix);
-		//System.out.println(wBet.get(0,0));
-		//System.out.println(wOut.get(0, 0));
-		//Matrix wPca = func.Fisherfaces.WFLD(preparedMatrix);
-		//System.out.println(wPca.getColumnDimension()+"  "+wPca.getRowDimension());
-		//wPca.print(10,2);
-		// Cross Validation
-		
-		
-		//CheckIfWorks(preparedMatrix);
+
+		/* Validation K-Fold */
 		Validate(preparedMatrix);
-		//CheckIfWorks(preparedMatrix);
 	}
+	
+	
+	/**
+	 * Fonction débutant la validation
+	 * @param La matrice qui a été prépare et prète à subir un PCA / LDA.
+	 */
 	
 	public static void Validate(Matrix preparedMatrix)
 	{
 		ArrayList<Matrix> matrixArray = new ArrayList<Matrix>();
-		// Prepare Matrices
 		for(int k = 0; k < 10; k++)
 		{
-			// Split Matrices into 40 Matrices containing 1 vector of each class
+			// Sépare les matrices en 40. Chacun contenant 1 vecteur de chaque classe.
 			matrixArray.add(k,func.Fonctions.AppendRecursively(preparedMatrix, k, 40));
 		}
 		
-		//Validate
 		double mean = 0;
 		double variance = 0;
 		for(int k = 0; k < 10 ; k++)
 		{
-			//System.out.println("Mean total for k interation " + k + " " +func.Fonctions.meanTotal(func.Fonctions.aggregateExceptOne(matrixArray, k)));
+			
+			// Fait appel à l'entraînement et à l'évaluation du modèle
 			System.out.println("Debut de l'entrainement");
 			EntrainerModele(func.Fonctions.aggregateExceptOne(matrixArray, k));
 			System.out.println("Fin de l'entrainement");
@@ -95,6 +66,11 @@ public class Main {
 			System.out.println("Fin du test");
 		}
 	}
+	
+	/**
+	 * Entraîne le modèle sur la matrice passée en paramètre
+	 * @param Matrice 
+	 */
 	
 	public static void EntrainerModele(Matrix ent)
 	{
@@ -107,9 +83,14 @@ public class Main {
 		//toTrainProjected.print(2, 2);
 		// Having the new PCA get the Fisher
 		// We need to store the return to a variable for EvaluerModele
-		woptEntraine = func.Fisherfaces.WOPT(toTrainProjected, true);
+		woptEntraine = func.Fisherfaces.WOPT(toTrainProjected);
 		System.out.println("WOPT rows: " + woptEntraine.getRowDimension() + " cols: " + woptEntraine.getColumnDimension());
 	}
+	
+	/**
+	 * La matrice passée en paramètre sera évaluée.
+	 * @param ev
+	 */
 	
 	public static void EvaluerModele(Matrix ev)
 	{
@@ -126,9 +107,6 @@ public class Main {
 							));
 			vecteurPoids.print(2, 2);
 			
-		}
-		
-		
-		
+		}		
 	}
 }

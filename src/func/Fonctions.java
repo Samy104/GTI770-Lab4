@@ -1,45 +1,29 @@
 package func;
 
-
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
-import java.awt.Image;
-import java.awt.Transparency;
-import java.awt.color.ColorSpace;
-import java.awt.image.*;
 import java.io.*;
 import java.util.Random;
 
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageOutputStream;
-import javax.swing.ImageIcon;
-
 import Jama.Matrix;
-/*
+/**
+ * @author Samy Lemcelli, Christopher Larivière
  * Functions for Matrices
  */
 public class Fonctions {
+	
 	public static int numberClasses = 0;
 	
 	private Fonctions(){}
 		
-	public static Matrix MatrixToColumnMatrix(Matrix orig)
-	{
-		Matrix newMat = new Matrix(orig.getColumnDimension()*orig.getRowDimension(),1);
-		
-		for(int col = 0; col < orig.getColumnDimension(); col++)
-		{
-			newMat.setMatrix(0+col*orig.getRowDimension(), orig.getRowDimension()-1+col*orig.getRowDimension(), 0, 0, orig.getMatrix(0, orig.getRowDimension()-1, col, col));
-		}
-		
-		return newMat;
-	}
 	
-	public static void createImage(String path, FileInputStream fis){
-		
-	}
+	/**
+	 * Debute la fonction, converti chaque image en une matrice colonne à l'aide des fonctions AppendMatrix et AppendMatrixRecursively
+	 * @param Files les dossiers 
+	 * @return Matrix une matrice préparé  
+	 * @throws IOException (si le fichier ne peut pas être lu.
+	 */
 	
 	public static Matrix PrepareMatrix(File files) throws IOException{
 		Matrix collectionOfFiles = null;
@@ -79,6 +63,15 @@ public class Fonctions {
 		return collectionOfFiles;
 	}
 	
+	/**
+	 * 
+	 * @param Le chemin du fichier à lire.
+	 * @param la largeur de l'image. Pour ce laboratoire tout les images sont de largeur 92 
+	 * @param l'hauteur de l'image. Pour ce laboratoire tout les images sont de hauteur 112
+	 * @return Matrice de taille 10304 x 1
+	 */
+	
+	@SuppressWarnings("resource")
 	private static Matrix GetMatrixFromFile(String fileString, int picWidth, int picHeight) {
 	
 			Matrix matrix = new Matrix(picWidth*picHeight,1);
@@ -96,29 +89,14 @@ public class Fonctions {
 		    {
 		    	ex.printStackTrace();
 		    }
-			
-		    
-		    
 			return matrix;
-		
-	}
-
-	public static int getMaxDet(Matrix x)
-	{
-		double max = 0;
-		int index = 0;
-		
-		for(int col = 0; col < x.getColumnDimension(); col++)
-		{
-			//System.out.println(x.getRowDimension() + " " + x.getColumnDimension());
-			double det = x.getMatrix(0, x.getRowDimension()-1, col, col).det();
-			index = (det > max) ? col : index;
-			max = (det > max) ? det : max;
-		}
-		
-		return index;
-	}
+	}	
 	
+	/**
+	 * Calcule la matrice centré de la matrice passée en paramètre
+	 * @param Matrice à calculer sont centrées
+	 * @return
+	 */
 	
 	public static Matrix CalculateCenteredMatrix(Matrix x){	
 		
@@ -135,6 +113,12 @@ public class Fonctions {
 		return (xBar);
 	}
 	
+	/**
+	 * Génère la matrice dispersée St
+	 * @param Matrice à dispersée
+	 * @return Matrice dispersée
+	 */
+	
 	public static Matrix GenerateScatterMatrix(Matrix x){	
 		
 		Matrix xBar = new Matrix(x.getRowDimension(), x.getColumnDimension());
@@ -149,6 +133,14 @@ public class Fonctions {
 		
 		return (xBar.transpose().times(xBar));
 	}
+	
+	/**
+	 * Calcule la moyenne pour la colonne de la matrice passée en paramètre
+	 * @param Matrix à calculer la moyenne
+	 * @param Le numéro de la colonne que vous voulez calculer 
+	 * @return moyenne de la colonne
+	 */
+	
 	public static double mean(Matrix x, int column)
 	{
 		double data = 0;
@@ -159,6 +151,12 @@ public class Fonctions {
 		
 		return data/x.getRowDimension();
 	}
+	
+	/**
+	 * Calcule la moyenne total de la matrice passée en paramètre
+	 * @param Matrice x
+	 * @return la moyenne total de la matrice
+	 */
 	
 	public static double meanTotal(Matrix x)
 	{
@@ -181,144 +179,6 @@ public class Fonctions {
 		return total/data.length;
 	}
 	
-	public static int GetAmount(Matrix matrix, int i) {
-		int count = 0;
-		for(int row = 0; row < matrix.getRowDimension(); row++)
-		{
-			count += (matrix.get(row, 0) == i) ? 1 : 0;
-		}
-		
-		return count;
-	}
-
-	public static Matrix GetMatrixPowered(Matrix m, int power)
-	{
-		for(int i = 0; i <= power; i++)
-		{
-			m.times(m);
-		}
-		
-		return m;
-	}
-	
-	public static Matrix GetEPowered(Matrix m)
-	{
-		Matrix e = new Matrix(m.getRowDimension(),m.getColumnDimension());
-		
-		for(int i = 0; i < e.getRowDimension();i++)
-		{
-			for(int j = 0; j < e.getColumnDimension(); j++)
-			{
-				e.set(i, j, Math.pow(Math.E,m.get(i, j)));
-			}
-		}
-		
-		return e;
-	}
-	public static Matrix GetLogTen(Matrix m)
-	{
-		Matrix l = new Matrix(m.getRowDimension(),m.getColumnDimension());
-		
-		for(int i = 0; i < l.getRowDimension();i++)
-		{
-			for(int j = 0; j < l.getColumnDimension(); j++)
-			{
-				l.set(i, j, Math.log10(m.get(i, j)));
-			}
-		}
-		
-		return l;
-	}
-	
-	public static Matrix AddToMatrix(Matrix m, double d)
-	{
-		Matrix a = new Matrix(m.getRowDimension(),m.getColumnDimension());
-		
-		for(int i = 0; i < a.getRowDimension();i++)
-		{
-			for(int j = 0; j < a.getColumnDimension(); j++)
-			{
-				a.set(i, j, (m.get(i, j) + d));
-			}
-		}
-		
-		return a;
-	}
-	
-	public static Matrix AddToMatrix(Matrix m, int x)
-	{
-		Matrix a = new Matrix(m.getRowDimension(),m.getColumnDimension());
-		
-		for(int i = 0; i < a.getRowDimension();i++)
-		{
-			for(int j = 0; j < a.getColumnDimension(); j++)
-			{
-				a.set(i, j, (m.get(i, j) + x));
-			}
-		}
-		
-		return a;
-	}
-	
-	public static Matrix RemoveToMatrix(Matrix m, int x)
-	{
-		Matrix a = new Matrix(m.getRowDimension(),m.getColumnDimension());
-		
-		for(int i = 0; i < a.getRowDimension();i++)
-		{
-			for(int j = 0; j < a.getColumnDimension(); j++)
-			{
-				a.set(i, j, (m.get(i, j) - x));
-			}
-		}
-		
-		return a;
-	}
-	
-	public static Matrix RemoveToMatrix(Matrix m, double x)
-	{
-		Matrix a = new Matrix(m.getRowDimension(),m.getColumnDimension());
-		
-		for(int i = 0; i < a.getRowDimension();i++)
-		{
-			for(int j = 0; j < a.getColumnDimension(); j++)
-			{
-				a.set(i, j, (m.get(i, j) - x));
-			}
-		}
-		
-		return a;
-	}
-	
-	public static Matrix DivideToMatrix(Matrix m, int x)
-	{
-		Matrix a = new Matrix(m.getRowDimension(),m.getColumnDimension());
-		
-		for(int i = 0; i < a.getRowDimension();i++)
-		{
-			for(int j = 0; j < a.getColumnDimension(); j++)
-			{
-				a.set(i, j, (m.get(i, j) / x));
-			}
-		}
-		
-		return a;
-	}
-	
-	public static Matrix DivideToMatrix(Matrix m, double x)
-	{
-		Matrix a = new Matrix(m.getRowDimension(),m.getColumnDimension());
-		
-		for(int i = 0; i < a.getRowDimension();i++)
-		{
-			for(int j = 0; j < a.getColumnDimension(); j++)
-			{
-				a.set(i, j, (m.get(i, j) / x));
-			}
-		}
-		
-		return a;
-	}
 	/**
 	 * Retourne une matrice aléatoirement choisi
 	 * @author Samy Lemcelli
@@ -350,12 +210,13 @@ public class Fonctions {
 	}
 	
 	/**
-	 * La fonction prends le ArrayList de Matrices et choisis les 225 rangées qui n'appartiennent pas à l'indice.
+	 * La fonction prends une ArrayList de Matrices et choisis les 225 rangées qui n'appartiennent pas à l'indice.
 	 * 
 	 * @param ArrayList<Matrix> agg
 	 * @param int thene
 	 * @return Matrice aggregation
 	 */
+	
 	public static Matrix aggregateExceptOne(ArrayList<Matrix> agg, int theone)
 	{
 		Matrix aggregation = new Matrix(agg.get(0).getRowDimension(),(agg.size()-1)*func.Fonctions.numberClasses);
@@ -374,6 +235,14 @@ public class Fonctions {
 		return aggregation;
 	}
 	
+	
+	/**
+	 * Ajoute récursivement les nouvelles colonnes d'images dans la matrice passée en paramètre
+	 * @param matrice passée en paramètre
+	 * @param constante k
+	 * @param nombre de classes restantes
+	 * @return
+	 */
 	public static Matrix AppendRecursively(Matrix initial, int k, int nbClass)
 	{
 		Matrix rec = null;
@@ -386,10 +255,16 @@ public class Fonctions {
 			rec = initial.getMatrix(0, initial.getRowDimension()-1, (nbClass-1)*10+k, (nbClass-1)*10+k);
 		}
 		
-		// Once the nbClass == 0 this will be the final return
+		//Lorsque nbClass == 0 ceci serait le dernier retour
 		return rec;
 	}
 	
+	/**
+	 * Concatène la matrice B à la matrice A
+	 * @param Matrice A
+	 * @param Matrice image x par 1
+	 * @return Matrice A avec le B dedans.
+	 */
 	
 	public static Matrix AppendMatrix(Matrix a, Matrix b){
 		Matrix augmentedMatrix = new Matrix(a.getRowDimension(),a.getColumnDimension()+b.getColumnDimension());
@@ -400,7 +275,12 @@ public class Fonctions {
 		return augmentedMatrix;
 	}
 	
-
+	/**
+	 * Imprime la matrice au fichier que nous spécifions
+	 * Ex: printMatrix(matrice à imprimer,"Output/matriceàimprimer.txt");
+	 * @param la matrice à imprimer
+	 * @param le chemin ou vous voulez sauvegarder votre matrice imprimer.
+	 */
 
 	public static void printMatrix(Matrix theMatrix,String path){		
 		PrintWriter printer = null;
