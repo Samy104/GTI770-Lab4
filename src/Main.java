@@ -25,6 +25,7 @@ public class Main {
 	 */
 	
 	public static void main(String[] args) {
+		long lecture = System.currentTimeMillis();
 		Matrix preparedMatrix = null;
 			try {
 				preparedMatrix = func.Fonctions.PrepareMatrix(new File("Octave-Matrices"));
@@ -32,9 +33,13 @@ public class Main {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
+		System.out.println("La lecture des images a pris au total " + (System.currentTimeMillis() - lecture) + " ms");
+		
 		/* Validation K-Fold */
+		long valid = System.currentTimeMillis();
 		Validate(preparedMatrix);
+		System.out.println("La validation croisée a pris au total " + (System.currentTimeMillis() - valid) + " ms");
+		System.out.println("L'application a pris au total " + (System.currentTimeMillis() - lecture) + " ms");
 	}
 	
 	
@@ -54,16 +59,17 @@ public class Main {
 		
 		double mean = 0;
 		double variance = 0;
+		long start=0;
 		for(int k = 0; k < 10 ; k++)
 		{
-			
-			// Fait appel à l'entraînement et à l'évaluation du modèle
+			start = System.currentTimeMillis();
 			System.out.println("Debut de l'entrainement");
 			EntrainerModele(func.Fonctions.aggregateExceptOne(matrixArray, k));
-			System.out.println("Fin de l'entrainement");
+			System.out.println("Fin de l'entrainement en " +  (System.currentTimeMillis() - start) + "ms" );
 			System.out.println("Debut du test");
 			EvaluerModele(matrixArray.get(k));
-			System.out.println("Fin du test");
+			System.out.println("Fin du test en " +  (System.currentTimeMillis() - start) + "ms");
+			System.out.println("");
 		}
 	}
 	
@@ -74,17 +80,10 @@ public class Main {
 	
 	public static void EntrainerModele(Matrix ent)
 	{
-		System.out.println(ent.getRowDimension() + "  :   " + ent.getColumnDimension());
-		// With the given matrix to train calculate the new PCA
 		pcaEntraine = new PCA(ent);
 		pcaEntraine.Calculate();
 		Matrix toTrainProjected = pcaEntraine.getProjectedMatrix();
-		func.Fonctions.printMatrix(toTrainProjected,"Output/reduite.txt");
-		//toTrainProjected.print(2, 2);
-		// Having the new PCA get the Fisher
-		// We need to store the return to a variable for EvaluerModele
 		woptEntraine = func.Fisherfaces.WOPT(toTrainProjected);
-		System.out.println("WOPT rows: " + woptEntraine.getRowDimension() + " cols: " + woptEntraine.getColumnDimension());
 	}
 	
 	/**
@@ -94,19 +93,38 @@ public class Main {
 	
 	public static void EvaluerModele(Matrix ev)
 	{
-		// Reduce the dimensions to fit with the old
+		int nombreErreur = 0;
+		
+		Matrix vecteurPoidsEntraine = woptEntraine.times(pcaEntraine.getProjectedMatrix());
 		for(int col = 0; col < ev.getColumnDimension(); col++)
 		{
 			Matrix currentImageCentre = func.Fonctions.CalculateCenteredMatrix(ev.getMatrix(0, ev.getRowDimension()-1, col, col));
-			System.out.println("W:" + woptEntraine.getRowDimension() + "  " + woptEntraine.getColumnDimension());
-			System.out.println("PCA:" + pcaEntraine.getPrincipauxVecteurs().getRowDimension() + "  " + pcaEntraine.getPrincipauxVecteurs().getColumnDimension());
-			System.out.println("Xbar:" + currentImageCentre.getRowDimension() + "  " + currentImageCentre.getColumnDimension());
-			Matrix vecteurPoids = woptEntraine
-					.times(pcaEntraine.getPrincipauxVecteurs()
+			Matrix vecteurPoidsTest = woptEntraine
+					.times(pcaEntraine.getWk()
 					.times(currentImageCentre
 							));
-			vecteurPoids.print(2, 2);
+			int best = 0;
+			double total = 99999;
+			for(int colE = 0; colE < vecteurPoidsEntraine.getColumnDimension(); colE++)
+			{
+				double tempTot = 0;
+				for(int row = 0; row < vecteurPoidsEntraine.getRowDimension(); row++)
+				{
+					tempTot += (vecteurPoidsEntraine.get(row, colE) 
+							+vecteurPoidsTest.get(row, 0))/2;
+				}
+				best = (Math.abs(tempTot) < Math.abs(total)) ? colE : best;
+				total = (Math.abs(tempTot) < Math.abs(total)) ? tempTot : total;
+			}
 			
-		}		
+			if(best == col)
+			{
+				nombreErreur++;
+			}
+			
+		}
+		double prob = (double)nombreErreur/(double)ev.getColumnDimension();
+		System.out.println("En effectuant ce test nous avons " + nombreErreur+ " erreur(s)");
+		System.out.println("La probabilité d'erreur dans ce test est de " +prob);
 	}
 }

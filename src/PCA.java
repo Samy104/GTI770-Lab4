@@ -14,6 +14,7 @@ public class PCA {
 	
 	public Matrix xBar = null;
 	public Matrix R = null;
+	public Matrix wk = null;
 	
 	public Matrix matriceDeCovariance = null;
 	
@@ -42,22 +43,21 @@ public class PCA {
 		
 		this.xBar = func.Fonctions.CalculateCenteredMatrix(xMatrix);
 		
-		Matrix swapped = getSwappedDIAGMatrix(diagonal(xMatrix));
-		calculatePrincipauxVec(swapped,xMatrix);
+		Matrix swapped = getSwappedDIAGMatrix(diagonal(xBar));
+		calculatePrincipauxVec(swapped,xBar);
 		
-		Matrix Wk = principauxVecteurs.times(getXbar().transpose());
-		this.Z = Wk.times(getXbar());
-		System.out.println(this.Z.getRowDimension() + " " +this.Z.getColumnDimension());
+		this.wk = principauxVecteurs.times(getXbar().transpose());
+		this.Z = this.wk.times(getXbar());
 		
 	}
 	
 	/**
 	 * Calcule les K principaux vecteurs avec un alpha qui représente 0.98 ou 98 % (pourcent) des données
-	 * @param La matrice à calculer les vecteurs propres
-	 * @param matriceDeCov
+	 * @param La matrice pour calculer les vecteurs propres
+	 * @param x
 	 */
 	
-	public void calculatePrincipauxVec(Matrix swap,Matrix matriceDeCov){
+	public void calculatePrincipauxVec(Matrix swap,Matrix x){
 		int i = 0;
 		
 		while(i < swap.getRowDimension() && !getKPrincipauxVecteurs(i, swap))	{
@@ -66,7 +66,7 @@ public class PCA {
 		i++;
 		
 		System.out.println("Number of principaux vectors is " + i);
-		Matrix vecProp = vecteurPropre(matriceDeCov);
+		Matrix vecProp = vecteurPropre(x);
 		principauxVecteurs = getFirstIPrincVec(vecProp, i);
 	}
 		
@@ -141,6 +141,17 @@ public class PCA {
 	public Matrix getPrincipauxVecteurs()
 	{
 		return this.principauxVecteurs;
+	}
+	
+	/**
+	 * Les poids vectorielles
+	 * N.B: la matrice doit être calculer, sinon, la matrice retournera null.
+	 * @return
+	 */
+	
+	public Matrix getWk()
+	{
+		return this.wk;
 	}
 	
 	/**

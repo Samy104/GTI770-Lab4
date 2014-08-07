@@ -97,47 +97,6 @@ public class Fisherfaces {
 	}
 	
 	/**
-	 * Calcule la matrice Wpca nécessaire pour l'application
-	 * @param La matrice W
-	 * @return une matrice Wpca
-	 */
-	
-	public static Matrix WPCA(Matrix W)
-	{
-		System.out.println("Scatter : " + ScatterMatrix(W).getRowDimension()+ "  "+ScatterMatrix(W).getColumnDimension());
-		System.out.println("W : " + W.getRowDimension()+ "  "+W.getColumnDimension());
-		return W.times(ScatterMatrix(W)).times(W.transpose());
-	}
-	
-	/**
-	 * Calcule la matrice "Fishers linear discriminant" pour la matrice passée en paramètre
-	 * @param Matrice W
-	 * @return Matrice Wfld
-	 */
-	
-	public static Matrix WFLD(Matrix W)
-	{
-		Matrix wpca = WPCA(W);
-		
-		Matrix num = W.transpose()
-				.times(wpca.transpose())
-				.times(BetweenScatterMatrix(W))
-				.times(wpca)
-				.times(W);
-		
-		Matrix denum = W.transpose()
-				.times(wpca.transpose())
-				.times(WithinScatterMatrix(W))
-				.times(wpca)
-				.times(W);
-		
-		System.out.println("Num : " + num.getRowDimension() + "   " + num.getColumnDimension());
-		System.out.println("Denum : " + denum.getRowDimension() + "   " + denum.getColumnDimension());
-		return denum.transpose().times(num);
-
-	}
-	
-	/**
 	 * Calcule la matrice Wopt (W optimale) de la matrice passée en paramètre
 	 * @param Matrice W
 	 * @return la matrice Wopt
